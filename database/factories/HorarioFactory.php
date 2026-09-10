@@ -2,23 +2,36 @@
 
 namespace Database\Factories;
 
-use App\Models\Horario;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-/**
- * @extends Factory<Horario>
- */
 class HorarioFactory extends Factory
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
     public function definition(): array
     {
         return [
-            //
+            'dia_semana' => fake()->randomElement([
+                'lunes',
+                'martes',
+                'miércoles',
+                'jueves',
+                'viernes',
+            ]),
+
+            'hora_inicio' => fake()->randomElement([
+                '08:00:00',
+                '10:00:00',
+                '13:00:00',
+                '15:00:00',
+            ]),
+
+            'hora_fin' => fake()->randomElement([
+                '09:50:00',
+                '11:50:00',
+                '14:50:00',
+                '16:50:00',
+            ]),
+
+            'salon' => fake()->optional()->bothify('A-##'),
         ];
     }
 }

@@ -2,23 +2,23 @@
 
 namespace Database\Factories;
 
-use App\Models\Recordatorio;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-/**
- * @extends Factory<Recordatorio>
- */
 class RecordatorioFactory extends Factory
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
     public function definition(): array
     {
         return [
-            //
+            'titulo' => fake()->sentence(4),
+
+            'descripcion' => fake()->optional()->sentence(),
+
+            'fecha_recordatorio' => fake()->dateTimeBetween(
+                'now',
+                '+1 month'
+            ),
+
+            'hora_inicio' => fake()->time(),
         ];
     }
 }

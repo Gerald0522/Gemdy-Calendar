@@ -11,10 +11,32 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('pendientes', function (Blueprint $table) {
-            $table->id();
-            $table->timestamps();
-        });
+            Schema::create('pendientes', function (Blueprint $table) {
+        $table->id();
+
+        $table->foreignId('usuario_id')
+            ->constrained('usuarios')
+            ->cascadeOnDelete();
+
+        $table->foreignId('curso_id')
+            ->nullable()
+            ->constrained('cursos')
+            ->nullOnDelete();
+
+        $table->string('titulo', 150);
+
+        $table->text('descripcion')->nullable();
+
+        $table->string('estado', 20)
+            ->default('pendiente')
+            ->index();
+
+        $table->date('fecha_limite')->nullable();
+
+        $table->time('hora_pendiente')->nullable();
+
+        $table->timestamps();
+    });
     }
 
     /**

@@ -12,9 +12,23 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('horarios', function (Blueprint $table) {
-            $table->id();
-            $table->timestamps();
-        });
+        $table->id();
+
+        $table->foreignId('usuario_id')
+            ->constrained('usuarios')
+            ->cascadeOnDelete();
+
+        $table->foreignId('curso_id')
+            ->constrained('cursos')
+            ->cascadeOnDelete();
+
+        $table->string('dia_semana', 15);
+        $table->time('hora_inicio');
+        $table->time('hora_fin');
+        $table->string('salon', 50)->nullable();
+
+        $table->timestamps();
+    });
     }
 
     /**

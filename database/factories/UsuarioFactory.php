@@ -16,9 +16,19 @@ class UsuarioFactory extends Factory
      * @return array<string, mixed>
      */
     public function definition(): array
-    {
-        return [
-            //
-        ];
-    }
+{
+    return [
+        'nombre1' => fake()->firstName(),
+        'nombre2' => fake()->optional()->firstName(),
+
+        'apellido1' => fake()->lastName(),
+        'apellido2' => fake()->optional()->lastName(),
+
+        'correo' => fake()->unique()->safeEmail(),
+
+        'telefono' => fake()->numerify('########'),
+
+        'contrasena' => bcrypt('12345678'),
+    ];
+}
 }

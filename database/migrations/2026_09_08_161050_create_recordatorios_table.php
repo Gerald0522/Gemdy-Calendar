@@ -11,10 +11,27 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('recordatorios', function (Blueprint $table) {
-            $table->id();
-            $table->timestamps();
-        });
+            Schema::create('recordatorios', function (Blueprint $table) {
+        $table->id();
+
+        $table->foreignId('usuario_id')
+            ->constrained('usuarios')
+            ->cascadeOnDelete();
+
+        $table->foreignId('pendiente_id')
+            ->constrained('pendientes')
+            ->cascadeOnDelete();
+
+        $table->string('titulo', 150);
+
+        $table->text('descripcion')->nullable();
+
+        $table->date('fecha_recordatorio');
+
+        $table->time('hora_inicio');
+
+        $table->timestamps();
+    });
     }
 
     /**

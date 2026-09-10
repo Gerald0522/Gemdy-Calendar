@@ -11,10 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('pendiente_etiquetas', function (Blueprint $table) {
-            $table->id();
-            $table->timestamps();
-        });
+        Schema::create('etiquetas', function (Blueprint $table) {
+        $table->id();
+
+        $table->string('nombre', 50);
+        $table->string('color', 30)->nullable();
+
+        $table->timestamps();
+    });
     }
 
     /**
@@ -22,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('pendiente_etiquetas');
+        Schema::dropIfExists('etiquetas');
     }
 };

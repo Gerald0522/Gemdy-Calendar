@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 
-class TipoEventoController extends Controller
+class PendienteController extends Controller
 {
     /**
      * Display a listing of the resource.
