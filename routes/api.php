@@ -5,7 +5,6 @@ use App\Http\Controllers\PendienteController;
 use App\Http\Controllers\CursoController;
 use App\Models\Pendiente;
 
-// Consultas especiales del Laboratorio 3
 
 Route::get('/pendientes/proximos', function () {
     return Pendiente::proximos()->get();
@@ -19,14 +18,12 @@ Route::get('/pendientes/resumen/estado', function () {
         ->get();
 });
 
-// Operación transaccional Laboratorio 4
 
 Route::post(
     '/pendientes/con-recordatorio',
     [PendienteController::class, 'storeConRecordatorio']
 );
 
-// CRUD Laboratorio 4
 
 Route::apiResource(
     'pendientes',
