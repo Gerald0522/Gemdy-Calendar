@@ -2,47 +2,66 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StorePendienteRequest;
+use App\Http\Requests\UpdatePendienteRequest;
+use App\Http\Requests\StorePendienteConRecordatorioRequest;
+use App\Models\Pendiente;
+use App\Services\PendienteService;
 use Illuminate\Http\Request;
 
 class PendienteController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    public function __construct(
+        private PendienteService $service
+    ) {}
+
+    public function index(Request $request)
     {
-        //
+        return response()->json(
+            $this->service->listar($request->all())
+        );
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+    public function store(StorePendienteRequest $request)
     {
-        //
+        $pendiente = $this->service->crear(
+            $request->validated()
+        );
+
+        return response()->json($pendiente, 201);
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
+    public function storeConRecordatorio(
+        StorePendienteConRecordatorioRequest $request
+    ) {
+        $pendiente = $this->service->crearConRecordatorio(
+            $request->validated()
+        );
+
+        return response()->json($pendiente, 201);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
+    public function show(Pendiente $pendiente)
     {
-        //
+        return response()->json($pendiente);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
+    public function update(
+        UpdatePendienteRequest $request,
+        Pendiente $pendiente
+    ) {
+        $pendiente = $this->service->actualizar(
+            $pendiente,
+            $request->validated()
+        );
+
+        return response()->json($pendiente);
+    }
+
+    public function destroy(Pendiente $pendiente)
     {
-        //
+        $this->service->eliminar($pendiente);
+
+        return response()->json(null, 204);
     }
 }

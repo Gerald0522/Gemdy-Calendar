@@ -2,47 +2,55 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreCursoRequest;
+use App\Http\Requests\UpdateCursoRequest;
+use App\Models\Curso;
+use App\Services\CursoService;
 use Illuminate\Http\Request;
 
 class CursoController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    public function __construct(
+        private CursoService $service
+    ) {}
+
+    public function index(Request $request)
     {
-        //
+        return response()->json(
+            $this->service->listar($request->all())
+        );
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+    public function store(StoreCursoRequest $request)
     {
-        //
+        $curso = $this->service->crear(
+            $request->validated()
+        );
+
+        return response()->json($curso, 201);
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    public function show(Curso $curso)
     {
-        //
+        return response()->json($curso);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
+    public function update(
+        UpdateCursoRequest $request,
+        Curso $curso
+    ) {
+        $curso = $this->service->actualizar(
+            $curso,
+            $request->validated()
+        );
+
+        return response()->json($curso);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
+    public function destroy(Curso $curso)
     {
-        //
+        $this->service->eliminar($curso);
+
+        return response()->json(null, 204);
     }
 }
