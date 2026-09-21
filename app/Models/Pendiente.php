@@ -70,7 +70,7 @@ class Pendiente extends Model
     {
         return $query
             ->whereNotNull('fecha_limite')
-            ->orderBy('fecha_limite');
+            ->whereDate('fecha_limite', '>=', date('Y-m-d'));
     }
 
     

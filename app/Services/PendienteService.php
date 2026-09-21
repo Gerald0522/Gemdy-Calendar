@@ -21,6 +21,10 @@ class PendienteService
             $query->delCurso($filtros['curso_id']);
         }
 
+        if (!empty($filtros['proximos'])) {
+            $query->proximos();
+        }
+
         $orden = $filtros['orden'] ?? 'fecha_limite';
         $direccion = $filtros['direccion'] ?? 'asc';
 
@@ -40,7 +44,8 @@ class PendienteService
         }
 
         $porPagina = (int) ($filtros['por_pagina'] ?? 10);
-        $porPagina = min($porPagina, 50);
+
+        $porPagina = max(1, min($porPagina, 50));
 
         return $query
             ->orderBy($orden, $direccion)
@@ -163,5 +168,14 @@ class PendienteService
                 'El recordatorio no puede programarse después de la fecha límite del pendiente.'
             );
         }
+    }
+
+    public function resumenPorEstado()
+    {
+        return Pendiente::selectRaw(
+            'estado, COUNT(*) as cantidad'
+        )
+            ->groupBy('estado')
+            ->get();
     }
 }

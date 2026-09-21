@@ -1,0 +1,345 @@
+{
+  "info": {
+    "_postman_id": "59a813d9-87ec-45c1-8a1f-758e1210f47a",
+    "name": "Gemdy Calendar",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "57883422",
+    "_collection_link": "https://go.postman.co/collection/57883422-59a813d9-87ec-45c1-8a1f-758e1210f47a?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Listar cursos",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "",
+            "value": ""
+          },
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/cursos",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "cursos"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Mostrar Curso",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/cursos/1",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "cursos",
+            "1"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Crear Curso",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"usuario_id\": 1,\r\n    \"nombre\": \"Curso Prueba Lab 5\",\r\n    \"codigo\": \"LAB5-01\",\r\n    \"semestre\": \"II-2026\",\r\n    \"creditos\": 3\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url}}/cursos",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "cursos"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Crear Curso Inválido",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"usuario_id\": 1,\r\n    \"nombre\": \"\",\r\n    \"codigo\": \"\",\r\n    \"semestre\": \"\",\r\n    \"creditos\": 100\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url}}/cursos",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "cursos"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Curso Inexistente",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/cursos/999999",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "cursos",
+            "999999"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Eliminar curso con pendientes",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/cursos/1",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "cursos",
+            "1"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Listar pendientes",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/pendientes",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "pendientes"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Mostrar pendiente",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/pendientes/163",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "pendientes",
+            "163"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Crear pendiente",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"usuario_id\": 1,\r\n    \"curso_id\": 1,\r\n    \"titulo\": \"Pendiente prueba Lab 5\",\r\n    \"descripcion\": \"Prueba de creación desde Postman\",\r\n    \"estado\": \"pendiente\",\r\n    \"fecha_limite\": \"2026-09-30\",\r\n    \"hora_pendiente\": \"18:00:00\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url}}/pendientes",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "pendientes"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Crear pendiente con curso de otro usuario",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"usuario_id\": 1,\r\n    \"curso_id\": 55,\r\n    \"titulo\": \"Pendiente inválido Lab 5\",\r\n    \"descripcion\": \"Prueba de regla de negocio\",\r\n    \"estado\": \"pendiente\",\r\n    \"fecha_limite\": \"2026-09-30\",\r\n    \"hora_pendiente\": \"18:00:00\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url}}/pendientes",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "pendientes"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Pendientes Próximas",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/pendientes?proximos=1",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "pendientes"
+          ],
+          "query": [
+            {
+              "key": "proximos",
+              "value": "1"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Resumen de pendientes por estado",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/pendientes-estados",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "pendientes-estados"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Listar recordatorios de un pendiente",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/pendientes/1/recordatorios",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "pendientes",
+            "1",
+            "recordatorios"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Crear recordatorio.",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"usuario_id\": 1,\r\n    \"titulo\": \"Recordatorio Lab 5\",\r\n    \"descripcion\": \"Recordatorio creado desde Postman\",\r\n    \"fecha_recordatorio\": \"2026-09-25\",\r\n    \"hora_inicio\": \"15:00:00\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url}}/pendientes/1/recordatorios",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "pendientes",
+            "1",
+            "recordatorios"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Crear recordatorio inválido",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"usuario_id\": 1,\r\n    \"titulo\": \"Recordatorio inválido\",\r\n    \"descripcion\": \"Prueba de regla de negocio\",\r\n    \"fecha_recordatorio\": \"2026-10-30\",\r\n    \"hora_inicio\": \"15:00:00\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url}}/pendientes/1/recordatorios",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "pendientes",
+            "1",
+            "recordatorios"
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}

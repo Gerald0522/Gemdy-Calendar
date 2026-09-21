@@ -1,0 +1,662 @@
+openapi: 3.1.0
+info:
+  title: Laravel
+  version: 1.0.0
+  description: 'API REST para la gestión de cursos, pendientes y recordatorios de Gemdy Calendar.'
+servers:
+  -
+    url: 'http://localhost:8000/api'
+paths:
+  /cursos:
+    get:
+      operationId: cursos.index
+      description: |-
+        Obtiene una lista paginada de cursos.
+        Permite aplicar filtros y configurar el orden de los resultados.
+      summary: 'Listar cursos'
+      tags:
+        - Curso
+      responses:
+        200:
+          description: 'Paginated set of `CursoResource`'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { type: array, items: { $ref: '#/components/schemas/CursoResource' } }
+                  links: { type: object, properties: { first: { type: [string, 'null'] }, last: { type: [string, 'null'] }, prev: { type: [string, 'null'] }, next: { type: [string, 'null'] } }, required: [first, last, prev, next] }
+                  meta: { type: object, properties: { current_page: { type: integer, minimum: 1 }, from: { type: [integer, 'null'], minimum: 1 }, last_page: { type: integer, minimum: 1 }, links: { type: array, description: 'Generated paginator links.', items: { type: object, properties: { url: { type: [string, 'null'] }, label: { type: string }, active: { type: boolean } }, required: [url, label, active] } }, path: { type: [string, 'null'], description: 'Base path for paginator generated URLs.' }, per_page: { type: integer, description: 'Number of items shown per page.', minimum: 0 }, to: { type: [integer, 'null'], description: 'Number of the last item in the slice.', minimum: 1 }, total: { type: integer, description: 'Total number of items being paginated.', minimum: 0 } }, required: [current_page, from, last_page, links, path, per_page, to, total] }
+                required:
+                  - data
+                  - links
+                  - meta
+    post:
+      operationId: cursos.store
+      description: 'Crea un nuevo curso con los datos proporcionados.'
+      summary: 'Crear curso'
+      tags:
+        - Curso
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StoreCursoRequest'
+      responses:
+        201:
+          description: '`CursoResource`'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { $ref: '#/components/schemas/CursoResource' }
+                required:
+                  - data
+        422:
+          $ref: '#/components/responses/ValidationException'
+  '/cursos/{curso}':
+    get:
+      operationId: cursos.show
+      description: 'Obtiene la información de un curso específico.'
+      summary: 'Mostrar curso'
+      tags:
+        - Curso
+      parameters:
+        -
+          name: curso
+          in: path
+          required: true
+          description: 'The curso ID'
+          schema:
+            type: integer
+      responses:
+        200:
+          description: '`CursoResource`'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { $ref: '#/components/schemas/CursoResource' }
+                required:
+                  - data
+        404:
+          $ref: '#/components/responses/ModelNotFoundException'
+    put:
+      operationId: cursos.update
+      description: 'Actualiza los datos de un curso existente.'
+      summary: 'Actualizar curso'
+      tags:
+        - Curso
+      parameters:
+        -
+          name: curso
+          in: path
+          required: true
+          description: 'The curso ID'
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCursoRequest'
+      responses:
+        200:
+          description: '`CursoResource`'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { $ref: '#/components/schemas/CursoResource' }
+                required:
+                  - data
+        404:
+          $ref: '#/components/responses/ModelNotFoundException'
+        422:
+          $ref: '#/components/responses/ValidationException'
+    delete:
+      operationId: cursos.destroy
+      description: 'Elimina un curso siempre que no tenga pendientes activos.'
+      summary: 'Eliminar curso'
+      tags:
+        - Curso
+      parameters:
+        -
+          name: curso
+          in: path
+          required: true
+          description: 'The curso ID'
+          schema:
+            type: integer
+      responses:
+        204:
+          description: 'No content'
+        404:
+          $ref: '#/components/responses/ModelNotFoundException'
+        409:
+          description: 'El curso tiene pendientes activos.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: { type: string }
+                required:
+                  - message
+  /pendientes-estados:
+    get:
+      operationId: pendiente.resumenEstados
+      description: 'Obtiene la cantidad de pendientes agrupados por estado.'
+      summary: 'Resumen de pendientes por estado'
+      tags:
+        - Pendiente
+      responses:
+        200:
+          description: 'Array of `ResumenEstadoResource`'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { type: array, items: { $ref: '#/components/schemas/ResumenEstadoResource' } }
+                required:
+                  - data
+  /pendientes:
+    get:
+      operationId: pendientes.index
+      description: |-
+        Obtiene una lista paginada de pendientes.
+        Permite aplicar filtros por estado, curso y próximos,
+        además de configurar el orden de los resultados.
+      summary: 'Listar pendientes'
+      tags:
+        - Pendiente
+      responses:
+        200:
+          description: 'Paginated set of `PendienteResource`'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { type: array, items: { $ref: '#/components/schemas/PendienteResource' } }
+                  links: { type: object, properties: { first: { type: [string, 'null'] }, last: { type: [string, 'null'] }, prev: { type: [string, 'null'] }, next: { type: [string, 'null'] } }, required: [first, last, prev, next] }
+                  meta: { type: object, properties: { current_page: { type: integer, minimum: 1 }, from: { type: [integer, 'null'], minimum: 1 }, last_page: { type: integer, minimum: 1 }, links: { type: array, description: 'Generated paginator links.', items: { type: object, properties: { url: { type: [string, 'null'] }, label: { type: string }, active: { type: boolean } }, required: [url, label, active] } }, path: { type: [string, 'null'], description: 'Base path for paginator generated URLs.' }, per_page: { type: integer, description: 'Number of items shown per page.', minimum: 0 }, to: { type: [integer, 'null'], description: 'Number of the last item in the slice.', minimum: 1 }, total: { type: integer, description: 'Total number of items being paginated.', minimum: 0 } }, required: [current_page, from, last_page, links, path, per_page, to, total] }
+                required:
+                  - data
+                  - links
+                  - meta
+    post:
+      operationId: pendientes.store
+      description: 'Crea un nuevo pendiente con los datos proporcionados.'
+      summary: 'Crear pendiente'
+      tags:
+        - Pendiente
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StorePendienteRequest'
+      responses:
+        201:
+          description: '`PendienteResource`'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { $ref: '#/components/schemas/PendienteResource' }
+                required:
+                  - data
+        422:
+          $ref: '#/components/responses/ValidationException'
+        409:
+          description: 'No se puede crear el pendiente porque incumple una regla de negocio.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: { type: string }
+                required:
+                  - message
+  '/pendientes/{pendiente}':
+    get:
+      operationId: pendientes.show
+      description: 'Obtiene la información de un pendiente específico.'
+      summary: 'Mostrar pendiente'
+      tags:
+        - Pendiente
+      parameters:
+        -
+          name: pendiente
+          in: path
+          required: true
+          description: 'The pendiente ID'
+          schema:
+            type: integer
+      responses:
+        200:
+          description: '`PendienteResource`'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { $ref: '#/components/schemas/PendienteResource' }
+                required:
+                  - data
+        404:
+          $ref: '#/components/responses/ModelNotFoundException'
+    put:
+      operationId: pendientes.update
+      description: 'Actualiza los datos de un pendiente existente.'
+      summary: 'Actualizar pendiente'
+      tags:
+        - Pendiente
+      parameters:
+        -
+          name: pendiente
+          in: path
+          required: true
+          description: 'The pendiente ID'
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdatePendienteRequest'
+      responses:
+        200:
+          description: '`PendienteResource`'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { $ref: '#/components/schemas/PendienteResource' }
+                required:
+                  - data
+        404:
+          $ref: '#/components/responses/ModelNotFoundException'
+        422:
+          $ref: '#/components/responses/ValidationException'
+        409:
+          description: 'No se puede actualizar el pendiente porque incumple una regla de negocio.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: { type: string }
+                required:
+                  - message
+    delete:
+      operationId: pendientes.destroy
+      description: 'Elimina un pendiente existente.'
+      summary: 'Eliminar pendiente'
+      tags:
+        - Pendiente
+      parameters:
+        -
+          name: pendiente
+          in: path
+          required: true
+          description: 'The pendiente ID'
+          schema:
+            type: integer
+      responses:
+        204:
+          description: 'No content'
+        404:
+          $ref: '#/components/responses/ModelNotFoundException'
+  '/pendientes/{pendiente}/recordatorios':
+    get:
+      operationId: recordatorio.index
+      description: 'Obtiene todos los recordatorios asociados a un pendiente específico.'
+      summary: 'Listar recordatorios de un pendiente'
+      tags:
+        - Recordatorio
+      parameters:
+        -
+          name: pendiente
+          in: path
+          required: true
+          description: 'The pendiente ID'
+          schema:
+            type: integer
+      responses:
+        200:
+          description: 'Array of `RecordatorioResource`'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { type: array, items: { $ref: '#/components/schemas/RecordatorioResource' } }
+                required:
+                  - data
+        404:
+          $ref: '#/components/responses/ModelNotFoundException'
+    post:
+      operationId: recordatorio.store
+      description: 'Crea un nuevo recordatorio asociado a un pendiente específico.'
+      summary: 'Crear recordatorio'
+      tags:
+        - Recordatorio
+      parameters:
+        -
+          name: pendiente
+          in: path
+          required: true
+          description: 'The pendiente ID'
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StoreRecordatorioRequest'
+      responses:
+        201:
+          description: '`RecordatorioResource`'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { $ref: '#/components/schemas/RecordatorioResource' }
+                required:
+                  - data
+        404:
+          $ref: '#/components/responses/ModelNotFoundException'
+        422:
+          $ref: '#/components/responses/ValidationException'
+        409:
+          description: 'No se puede crear el recordatorio porque incumple una regla de negocio.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: { type: string }
+                required:
+                  - message
+components:
+  schemas:
+    CursoResource:
+      type: object
+      properties:
+        id:
+          type: integer
+        usuario_id:
+          type: integer
+        nombre:
+          type: string
+        codigo:
+          type: string
+        semestre:
+          type: string
+        creditos:
+          type: integer
+      required:
+        - id
+        - usuario_id
+        - nombre
+        - codigo
+        - semestre
+        - creditos
+      title: CursoResource
+    PendienteResource:
+      type: object
+      properties:
+        id:
+          type: integer
+        usuario_id:
+          type: integer
+        curso_id:
+          type:
+            - integer
+            - 'null'
+        titulo:
+          type: string
+        descripcion:
+          type:
+            - string
+            - 'null'
+        estado:
+          type: string
+        fecha_limite:
+          type:
+            - string
+            - 'null'
+        hora_pendiente:
+          type:
+            - string
+            - 'null'
+      required:
+        - id
+        - usuario_id
+        - curso_id
+        - titulo
+        - descripcion
+        - estado
+        - fecha_limite
+        - hora_pendiente
+      title: PendienteResource
+    RecordatorioResource:
+      type: object
+      properties:
+        id:
+          type: integer
+        usuario_id:
+          type: integer
+        pendiente_id:
+          type: integer
+        titulo:
+          type: string
+        descripcion:
+          type:
+            - string
+            - 'null'
+        fecha_recordatorio:
+          type: string
+        hora_inicio:
+          type: string
+      required:
+        - id
+        - usuario_id
+        - pendiente_id
+        - titulo
+        - descripcion
+        - fecha_recordatorio
+        - hora_inicio
+      title: RecordatorioResource
+    ResumenEstadoResource:
+      type: object
+      properties:
+        estado:
+          type: string
+        cantidad:
+          type: integer
+      required:
+        - estado
+        - cantidad
+      title: ResumenEstadoResource
+    StoreCursoRequest:
+      type: object
+      properties:
+        usuario_id:
+          type: integer
+        nombre:
+          type: string
+          maxLength: 100
+        codigo:
+          type: string
+          maxLength: 20
+        semestre:
+          type: string
+          maxLength: 20
+        creditos:
+          type: integer
+          minimum: 1
+          maximum: 20
+      required:
+        - usuario_id
+        - nombre
+        - codigo
+        - semestre
+        - creditos
+      title: StoreCursoRequest
+    StorePendienteRequest:
+      type: object
+      properties:
+        usuario_id:
+          type: integer
+        curso_id:
+          type:
+            - integer
+            - 'null'
+        titulo:
+          type: string
+          maxLength: 150
+        descripcion:
+          type:
+            - string
+            - 'null'
+          maxLength: 1000
+        estado:
+          type: string
+          enum:
+            - pendiente
+            - en_progreso
+            - completado
+        fecha_limite:
+          type:
+            - string
+            - 'null'
+          format: date-time
+        hora_pendiente:
+          type:
+            - string
+            - 'null'
+      required:
+        - usuario_id
+        - titulo
+        - estado
+      title: StorePendienteRequest
+    StoreRecordatorioRequest:
+      type: object
+      properties:
+        usuario_id:
+          type: integer
+        titulo:
+          type: string
+          maxLength: 150
+        descripcion:
+          type:
+            - string
+            - 'null'
+          maxLength: 1000
+        fecha_recordatorio:
+          type: string
+          format: date-time
+        hora_inicio:
+          type: string
+      required:
+        - usuario_id
+        - titulo
+        - fecha_recordatorio
+        - hora_inicio
+      title: StoreRecordatorioRequest
+    UpdateCursoRequest:
+      type: object
+      properties:
+        usuario_id:
+          type: integer
+        nombre:
+          type: string
+          maxLength: 100
+        codigo:
+          type: string
+          maxLength: 20
+        semestre:
+          type: string
+          maxLength: 20
+        creditos:
+          type: integer
+          minimum: 1
+          maximum: 20
+      title: UpdateCursoRequest
+    UpdatePendienteRequest:
+      type: object
+      properties:
+        usuario_id:
+          type: integer
+        curso_id:
+          type:
+            - integer
+            - 'null'
+        titulo:
+          type: string
+          maxLength: 150
+        descripcion:
+          type:
+            - string
+            - 'null'
+          maxLength: 1000
+        estado:
+          type: string
+          enum:
+            - pendiente
+            - en_progreso
+            - completado
+        fecha_limite:
+          type:
+            - string
+            - 'null'
+          format: date-time
+        hora_pendiente:
+          type:
+            - string
+            - 'null'
+      title: UpdatePendienteRequest
+  responses:
+    ModelNotFoundException:
+      description: 'Not found'
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                description: 'Error overview.'
+            required:
+              - message
+    ValidationException:
+      description: 'Validation error'
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                description: 'Errors overview.'
+              errors:
+                type: object
+                description: 'A detailed description of each field that failed validation.'
+                additionalProperties:
+                  type: array
+                  items: { type: string }
+            required:
+              - message
+              - errors

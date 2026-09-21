@@ -1,9 +1,12 @@
 <?php
 
+use App\Exceptions\BusinessRuleException;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
-use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -16,7 +19,35 @@ return Application::configure(basePath: dirname(__DIR__))
         //
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        $exceptions->shouldRenderJsonWhen(
-            fn (Request $request) => $request->is('api/*') || $request->expectsJson(),
-        );
-    })->create();
+
+        // 409 - Regla de negocio incumplida
+        $exceptions->render(function (BusinessRuleException $e) {
+            return response()->json([
+                'message' => $e->getMessage(),
+            ], 409);
+        });
+
+        // 404 - Modelo o recurso no encontrado
+        $exceptions->render(function (ModelNotFoundException $e) {
+            return response()->json([
+                'message' => 'Recurso no encontrado.',
+            ], 404);
+        });
+
+        // 404 - Ruta o recurso no encontrado
+        $exceptions->render(function (NotFoundHttpException $e) {
+            return response()->json([
+                'message' => 'Recurso no encontrado.',
+            ], 404);
+        });
+
+        // 422 - Error de validación
+        $exceptions->render(function (ValidationException $e) {
+            return response()->json([
+                'message' => 'Los datos proporcionados no son válidos.',
+                'errors' => $e->errors(),
+            ], 422);
+        });
+
+    })
+    ->create();
