@@ -15,18 +15,30 @@ class StoreCursoRequest extends FormRequest
     public function rules(): array
     {
         return [
+            /**
+             * Identificador del usuario propietario del curso.
+             * @example 1
+             */
             'usuario_id' => [
                 'required',
                 'integer',
                 'exists:usuarios,id',
             ],
 
+            /**
+             * Nombre del curso.
+             * @example Desarrollo de Software
+             */
             'nombre' => [
                 'required',
                 'string',
                 'max:100',
             ],
 
+            /**
+             * Código del curso.
+             * @example IF-4101
+             */
             'codigo' => [
                 'required',
                 'string',
@@ -39,12 +51,20 @@ class StoreCursoRequest extends FormRequest
                     ),
             ],
 
+            /**
+             * Semestre en el que se imparte el curso.
+             * @example II-2026
+             */
             'semestre' => [
                 'required',
                 'string',
                 'max:20',
             ],
 
+            /**
+             * Cantidad de créditos del curso.
+             * @example 4
+             */
             'creditos' => [
                 'required',
                 'integer',
@@ -71,6 +91,7 @@ class StoreCursoRequest extends FormRequest
             'codigo.unique' => 'Este usuario ya tiene un curso con ese código.',
 
             'semestre.required' => 'El semestre es obligatorio.',
+            'semestre.string' => 'El semestre debe ser texto.',
             'semestre.max' => 'El semestre no puede superar los 20 caracteres.',
 
             'creditos.required' => 'La cantidad de créditos es obligatoria.',

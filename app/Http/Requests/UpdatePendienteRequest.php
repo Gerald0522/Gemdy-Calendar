@@ -81,6 +81,7 @@ class UpdatePendienteRequest extends FormRequest
             'descripcion.max' => 'La descripción no puede superar los 1000 caracteres.',
 
             'estado.required' => 'El estado es obligatorio.',
+            'estado.string' => 'El estado debe ser texto.',
             'estado.in' => 'El estado debe ser pendiente, en_progreso o completado.',
 
             'fecha_limite.date' => 'La fecha límite debe ser una fecha válida.',

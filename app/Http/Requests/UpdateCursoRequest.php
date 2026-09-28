@@ -82,6 +82,7 @@ class UpdateCursoRequest extends FormRequest
             'codigo.unique' => 'Este usuario ya tiene un curso con ese código.',
 
             'semestre.required' => 'El semestre es obligatorio.',
+            'semestre.string' => 'El semestre debe ser texto.',
             'semestre.max' => 'El semestre no puede superar los 20 caracteres.',
 
             'creditos.required' => 'La cantidad de créditos es obligatoria.',

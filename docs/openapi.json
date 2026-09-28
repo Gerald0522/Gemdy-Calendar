@@ -1,7 +1,7 @@
 {
     "openapi": "3.1.0",
     "info": {
-        "title": "Laravel",
+        "title": "Gemdy Calendar API",
         "version": "1.0.0",
         "description": "API REST para la gesti\u00f3n de cursos, pendientes y recordatorios de Gemdy Calendar."
     },
@@ -375,6 +375,49 @@
                                 }
                             }
                         }
+                    }
+                }
+            }
+        },
+        "/pendientes/con-recordatorio": {
+            "post": {
+                "operationId": "pendiente.storeConRecordatorio",
+                "description": "Crea un pendiente junto con su recordatorio asociado.\n\nEste m\u00e9todo se conserva como parte de la l\u00f3gica desarrollada\nanteriormente, aunque no se expone actualmente mediante una ruta.",
+                "summary": "Crear pendiente con recordatorio",
+                "tags": [
+                    "Pendiente"
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/StorePendienteConRecordatorioRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "`PendienteResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/PendienteResource"
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
                     }
                 }
             }
@@ -753,7 +796,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Array of `RecordatorioResource`",
+                        "description": "Paginated set of `RecordatorioResource`",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -764,10 +807,128 @@
                                             "items": {
                                                 "$ref": "#/components/schemas/RecordatorioResource"
                                             }
+                                        },
+                                        "links": {
+                                            "type": "object",
+                                            "properties": {
+                                                "first": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "last": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "prev": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "next": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                }
+                                            },
+                                            "required": [
+                                                "first",
+                                                "last",
+                                                "prev",
+                                                "next"
+                                            ]
+                                        },
+                                        "meta": {
+                                            "type": "object",
+                                            "properties": {
+                                                "current_page": {
+                                                    "type": "integer",
+                                                    "minimum": 1
+                                                },
+                                                "from": {
+                                                    "type": [
+                                                        "integer",
+                                                        "null"
+                                                    ],
+                                                    "minimum": 1
+                                                },
+                                                "last_page": {
+                                                    "type": "integer",
+                                                    "minimum": 1
+                                                },
+                                                "links": {
+                                                    "type": "array",
+                                                    "description": "Generated paginator links.",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "url": {
+                                                                "type": [
+                                                                    "string",
+                                                                    "null"
+                                                                ]
+                                                            },
+                                                            "label": {
+                                                                "type": "string"
+                                                            },
+                                                            "active": {
+                                                                "type": "boolean"
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "url",
+                                                            "label",
+                                                            "active"
+                                                        ]
+                                                    }
+                                                },
+                                                "path": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ],
+                                                    "description": "Base path for paginator generated URLs."
+                                                },
+                                                "per_page": {
+                                                    "type": "integer",
+                                                    "description": "Number of items shown per page.",
+                                                    "minimum": 0
+                                                },
+                                                "to": {
+                                                    "type": [
+                                                        "integer",
+                                                        "null"
+                                                    ],
+                                                    "description": "Number of the last item in the slice.",
+                                                    "minimum": 1
+                                                },
+                                                "total": {
+                                                    "type": "integer",
+                                                    "description": "Total number of items being paginated.",
+                                                    "minimum": 0
+                                                }
+                                            },
+                                            "required": [
+                                                "current_page",
+                                                "from",
+                                                "last_page",
+                                                "links",
+                                                "path",
+                                                "per_page",
+                                                "to",
+                                                "total"
+                                            ]
                                         }
                                     },
                                     "required": [
-                                        "data"
+                                        "data",
+                                        "links",
+                                        "meta"
                                     ]
                                 }
                             }
@@ -851,6 +1012,57 @@
                     }
                 }
             }
+        },
+        "/pendientes/{pendiente}/recordatorios/{recordatorio}": {
+            "get": {
+                "operationId": "recordatorio.show",
+                "tags": [
+                    "Recordatorio"
+                ],
+                "parameters": [
+                    {
+                        "name": "pendiente",
+                        "in": "path",
+                        "required": true,
+                        "description": "The pendiente ID",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "recordatorio",
+                        "in": "path",
+                        "required": true,
+                        "description": "The recordatorio ID",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "`RecordatorioResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/RecordatorioResource"
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ModelNotFoundException"
+                    }
+                }
+            }
         }
     },
     "components": {
@@ -859,22 +1071,46 @@
                 "type": "object",
                 "properties": {
                     "id": {
-                        "type": "integer"
+                        "type": "integer",
+                        "description": "Identificador del curso.",
+                        "examples": [
+                            1
+                        ]
                     },
                     "usuario_id": {
-                        "type": "integer"
+                        "type": "integer",
+                        "description": "Identificador del usuario propietario.",
+                        "examples": [
+                            1
+                        ]
                     },
                     "nombre": {
-                        "type": "string"
+                        "type": "string",
+                        "description": "Nombre del curso.",
+                        "examples": [
+                            "Desarrollo de Software"
+                        ]
                     },
                     "codigo": {
-                        "type": "string"
+                        "type": "string",
+                        "description": "C\u00f3digo del curso.",
+                        "examples": [
+                            "IF-4101"
+                        ]
                     },
                     "semestre": {
-                        "type": "string"
+                        "type": "string",
+                        "description": "Semestre del curso.",
+                        "examples": [
+                            "II-2026"
+                        ]
                     },
                     "creditos": {
-                        "type": "integer"
+                        "type": "integer",
+                        "description": "Cantidad de cr\u00e9ditos.",
+                        "examples": [
+                            4
+                        ]
                     }
                 },
                 "required": [
@@ -891,39 +1127,71 @@
                 "type": "object",
                 "properties": {
                     "id": {
-                        "type": "integer"
+                        "type": "integer",
+                        "description": "Identificador del pendiente.",
+                        "examples": [
+                            1
+                        ]
                     },
                     "usuario_id": {
-                        "type": "integer"
+                        "type": "integer",
+                        "description": "Identificador del usuario propietario.",
+                        "examples": [
+                            1
+                        ]
                     },
                     "curso_id": {
                         "type": [
                             "integer",
                             "null"
+                        ],
+                        "description": "Identificador del curso asociado.",
+                        "examples": [
+                            1
                         ]
                     },
                     "titulo": {
-                        "type": "string"
+                        "type": "string",
+                        "description": "T\u00edtulo del pendiente.",
+                        "examples": [
+                            "Entregar proyecto de Desarrollo de Software"
+                        ]
                     },
                     "descripcion": {
                         "type": [
                             "string",
                             "null"
+                        ],
+                        "description": "Descripci\u00f3n del pendiente.",
+                        "examples": [
+                            "Completar y entregar el proyecto final del curso."
                         ]
                     },
                     "estado": {
-                        "type": "string"
+                        "type": "string",
+                        "description": "Estado actual del pendiente.",
+                        "examples": [
+                            "pendiente"
+                        ]
                     },
                     "fecha_limite": {
                         "type": [
                             "string",
                             "null"
+                        ],
+                        "description": "Fecha l\u00edmite.",
+                        "examples": [
+                            "2026-10-15"
                         ]
                     },
                     "hora_pendiente": {
                         "type": [
                             "string",
                             "null"
+                        ],
+                        "description": "Hora asociada al pendiente.",
+                        "examples": [
+                            "18:00:00"
                         ]
                     }
                 },
@@ -943,28 +1211,56 @@
                 "type": "object",
                 "properties": {
                     "id": {
-                        "type": "integer"
+                        "type": "integer",
+                        "description": "Identificador del recordatorio.",
+                        "examples": [
+                            1
+                        ]
                     },
                     "usuario_id": {
-                        "type": "integer"
+                        "type": "integer",
+                        "description": "Identificador del usuario propietario.",
+                        "examples": [
+                            1
+                        ]
                     },
                     "pendiente_id": {
-                        "type": "integer"
+                        "type": "integer",
+                        "description": "Identificador del pendiente asociado.",
+                        "examples": [
+                            1
+                        ]
                     },
                     "titulo": {
-                        "type": "string"
+                        "type": "string",
+                        "description": "T\u00edtulo del recordatorio.",
+                        "examples": [
+                            "Recordar entrega del proyecto"
+                        ]
                     },
                     "descripcion": {
                         "type": [
                             "string",
                             "null"
+                        ],
+                        "description": "Descripci\u00f3n del recordatorio.",
+                        "examples": [
+                            "Revisar el proyecto antes de realizar la entrega."
                         ]
                     },
                     "fecha_recordatorio": {
-                        "type": "string"
+                        "type": "string",
+                        "description": "Fecha del recordatorio.",
+                        "examples": [
+                            "2026-10-14"
+                        ]
                     },
                     "hora_inicio": {
-                        "type": "string"
+                        "type": "string",
+                        "description": "Hora del recordatorio.",
+                        "examples": [
+                            "18:00:00"
+                        ]
                     }
                 },
                 "required": [
@@ -998,22 +1294,42 @@
                 "type": "object",
                 "properties": {
                     "usuario_id": {
-                        "type": "integer"
+                        "type": "integer",
+                        "description": "Identificador del usuario propietario del curso.",
+                        "examples": [
+                            1
+                        ]
                     },
                     "nombre": {
                         "type": "string",
+                        "description": "Nombre del curso.",
+                        "examples": [
+                            "Desarrollo de Software"
+                        ],
                         "maxLength": 100
                     },
                     "codigo": {
                         "type": "string",
+                        "description": "C\u00f3digo del curso.",
+                        "examples": [
+                            "IF-4101"
+                        ],
                         "maxLength": 20
                     },
                     "semestre": {
                         "type": "string",
+                        "description": "Semestre en el que se imparte el curso.",
+                        "examples": [
+                            "II-2026"
+                        ],
                         "maxLength": 20
                     },
                     "creditos": {
                         "type": "integer",
+                        "description": "Cantidad de cr\u00e9ditos del curso.",
+                        "examples": [
+                            4
+                        ],
                         "minimum": 1,
                         "maximum": 20
                     }
@@ -1027,7 +1343,7 @@
                 ],
                 "title": "StoreCursoRequest"
             },
-            "StorePendienteRequest": {
+            "StorePendienteConRecordatorioRequest": {
                 "type": "object",
                 "properties": {
                     "usuario_id": {
@@ -1059,16 +1375,123 @@
                         ]
                     },
                     "fecha_limite": {
-                        "type": [
-                            "string",
-                            "null"
-                        ],
+                        "type": "string",
                         "format": "date-time"
                     },
                     "hora_pendiente": {
                         "type": [
                             "string",
                             "null"
+                        ]
+                    },
+                    "recordatorio": {
+                        "type": "object",
+                        "properties": {
+                            "titulo": {
+                                "type": "string",
+                                "maxLength": 150
+                            },
+                            "descripcion": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ],
+                                "maxLength": 1000
+                            },
+                            "fecha_recordatorio": {
+                                "type": "string",
+                                "format": "date-time"
+                            },
+                            "hora_inicio": {
+                                "type": "string"
+                            }
+                        },
+                        "required": [
+                            "titulo",
+                            "fecha_recordatorio",
+                            "hora_inicio"
+                        ]
+                    }
+                },
+                "required": [
+                    "usuario_id",
+                    "titulo",
+                    "estado",
+                    "fecha_limite",
+                    "recordatorio"
+                ],
+                "title": "StorePendienteConRecordatorioRequest"
+            },
+            "StorePendienteRequest": {
+                "type": "object",
+                "properties": {
+                    "usuario_id": {
+                        "type": "integer",
+                        "description": "Identificador del usuario propietario del pendiente.",
+                        "examples": [
+                            1
+                        ]
+                    },
+                    "curso_id": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ],
+                        "description": "Identificador del curso asociado.",
+                        "examples": [
+                            1
+                        ]
+                    },
+                    "titulo": {
+                        "type": "string",
+                        "description": "T\u00edtulo del pendiente.",
+                        "examples": [
+                            "Entregar proyecto de Desarrollo de Software"
+                        ],
+                        "maxLength": 150
+                    },
+                    "descripcion": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "Descripci\u00f3n del pendiente.",
+                        "examples": [
+                            "Completar y entregar el proyecto final del curso."
+                        ],
+                        "maxLength": 1000
+                    },
+                    "estado": {
+                        "type": "string",
+                        "description": "Estado actual del pendiente.",
+                        "enum": [
+                            "pendiente",
+                            "en_progreso",
+                            "completado"
+                        ],
+                        "examples": [
+                            "pendiente"
+                        ]
+                    },
+                    "fecha_limite": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "date-time",
+                        "description": "Fecha l\u00edmite del pendiente.",
+                        "examples": [
+                            "2026-10-15"
+                        ]
+                    },
+                    "hora_pendiente": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "Hora asociada al pendiente.",
+                        "examples": [
+                            "18:00:00"
                         ]
                     }
                 },
@@ -1083,10 +1506,18 @@
                 "type": "object",
                 "properties": {
                     "usuario_id": {
-                        "type": "integer"
+                        "type": "integer",
+                        "description": "Identificador del usuario propietario del recordatorio.",
+                        "examples": [
+                            1
+                        ]
                     },
                     "titulo": {
                         "type": "string",
+                        "description": "T\u00edtulo del recordatorio.",
+                        "examples": [
+                            "Recordar entrega del proyecto"
+                        ],
                         "maxLength": 150
                     },
                     "descripcion": {
@@ -1094,14 +1525,26 @@
                             "string",
                             "null"
                         ],
+                        "description": "Descripci\u00f3n del recordatorio.",
+                        "examples": [
+                            "Revisar el proyecto antes de realizar la entrega."
+                        ],
                         "maxLength": 1000
                     },
                     "fecha_recordatorio": {
                         "type": "string",
-                        "format": "date-time"
+                        "format": "date-time",
+                        "description": "Fecha en la que se realizar\u00e1 el recordatorio.",
+                        "examples": [
+                            "2026-10-14"
+                        ]
                     },
                     "hora_inicio": {
-                        "type": "string"
+                        "type": "string",
+                        "description": "Hora en la que se realizar\u00e1 el recordatorio.",
+                        "examples": [
+                            "18:00:00"
+                        ]
                     }
                 },
                 "required": [
@@ -1187,25 +1630,6 @@
             }
         },
         "responses": {
-            "ModelNotFoundException": {
-                "description": "Not found",
-                "content": {
-                    "application/json": {
-                        "schema": {
-                            "type": "object",
-                            "properties": {
-                                "message": {
-                                    "type": "string",
-                                    "description": "Error overview."
-                                }
-                            },
-                            "required": [
-                                "message"
-                            ]
-                        }
-                    }
-                }
-            },
             "ValidationException": {
                 "description": "Validation error",
                 "content": {
@@ -1231,6 +1655,25 @@
                             "required": [
                                 "message",
                                 "errors"
+                            ]
+                        }
+                    }
+                }
+            },
+            "ModelNotFoundException": {
+                "description": "Not found",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "message": {
+                                    "type": "string",
+                                    "description": "Error overview."
+                                }
+                            },
+                            "required": [
+                                "message"
                             ]
                         }
                     }

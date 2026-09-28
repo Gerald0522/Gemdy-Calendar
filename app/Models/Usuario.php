@@ -3,11 +3,13 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
 
-class Usuario extends Model
+class Usuario extends Authenticatable
 {
-    use HasFactory;
+    use HasFactory, Notifiable, HasApiTokens;
 
     protected $fillable = [
         'nombre1',
@@ -17,11 +19,39 @@ class Usuario extends Model
         'correo',
         'telefono',
         'contrasena',
+        'rol',
     ];
 
     protected $hidden = [
         'contrasena',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'contrasena' => 'hashed',
+        ];
+    }
+
+    public function getAuthPassword()
+    {
+        return $this->contrasena;
+    }
+
+    public function esAdmin(): bool
+    {
+        return $this->rol === 'admin';
+    }
+
+    public function esProfesor(): bool
+    {
+        return $this->rol === 'profesor';
+    }
+
+    public function esEstudiante(): bool
+    {
+        return $this->rol === 'estudiante';
+    }
 
     public function cursos()
     {

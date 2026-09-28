@@ -61,9 +61,6 @@ return [
 
     ],
 
-    'ui' => [
-        'title' => null,
-    ],
 
     /*
      * Load Scramble's development tools on documentation pages. An explicit

@@ -4,14 +4,25 @@ namespace App\Services;
 
 use App\Exceptions\BusinessRuleException;
 use App\Models\Curso;
+use App\Models\Usuario;
+use Illuminate\Support\Facades\Gate;
 
 class CursoService
 {
-    public function listar(array $filtros)
-    {
+    public function listar(
+        Usuario $usuario,
+        array $filtros
+    ) {
+        Gate::forUser($usuario)
+            ->authorize('viewAny', Curso::class);
+
         $query = Curso::query();
 
-        if (!empty($filtros['usuario_id'])) {
+        // Un usuario normal solamente puede ver sus propios cursos.
+        // El administrador puede consultar todos.
+        if (!$usuario->esAdmin()) {
+            $query->where('usuario_id', $usuario->id);
+        } elseif (!empty($filtros['usuario_id'])) {
             $query->where(
                 'usuario_id',
                 $filtros['usuario_id']
@@ -26,7 +37,6 @@ class CursoService
         }
 
         $orden = $filtros['orden'] ?? 'nombre';
-
         $direccion = $filtros['direccion'] ?? 'asc';
 
         $camposPermitidos = [
@@ -45,30 +55,62 @@ class CursoService
         }
 
         $porPagina = (int) ($filtros['por_pagina'] ?? 10);
-
-        $porPagina = min($porPagina, 50);
+        $porPagina = max(1, min($porPagina, 50));
 
         return $query
             ->orderBy($orden, $direccion)
             ->paginate($porPagina);
     }
 
-    public function crear(array $datos): Curso
-    {
+    public function crear(
+        Usuario $usuario,
+        array $datos
+    ): Curso {
+        Gate::forUser($usuario)
+            ->authorize('create', Curso::class);
+
+        // El curso siempre pertenece al usuario autenticado.
+        // No confiamos en un usuario_id enviado desde el cliente.
+        if (!$usuario->esAdmin()) {
+            $datos['usuario_id'] = $usuario->id;
+        }
+
         return Curso::create($datos);
     }
 
+    public function mostrar(
+        Usuario $usuario,
+        Curso $curso
+    ): Curso {
+        Gate::forUser($usuario)
+            ->authorize('view', $curso);
+
+        return $curso;
+    }
+
     public function actualizar(
+        Usuario $usuario,
         Curso $curso,
         array $datos
     ): Curso {
+        Gate::forUser($usuario)
+            ->authorize('update', $curso);
+
+        // Evita cambiar el propietario mediante una actualización.
+        unset($datos['usuario_id']);
+
         $curso->update($datos);
 
         return $curso->fresh();
     }
 
-    public function eliminar(Curso $curso): void
-    {
+    public function eliminar(
+        Usuario $usuario,
+        Curso $curso
+    ): void {
+        Gate::forUser($usuario)
+            ->authorize('delete', $curso);
+
         $this->validarPendientesActivos($curso);
 
         $curso->delete();

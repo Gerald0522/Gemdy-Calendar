@@ -8,7 +8,9 @@ use App\Http\Resources\CursoResource;
 use App\Models\Curso;
 use App\Services\CursoService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Dedoc\Scramble\Attributes\Response;
+
 
 class CursoController extends Controller
 {
@@ -24,7 +26,12 @@ class CursoController extends Controller
      */
     public function index(Request $request)
     {
-        $cursos = $this->service->listar($request->all());
+        Gate::authorize('viewAny', Curso::class);
+
+        $cursos = $this->service->listar(
+            $request->user(),
+            $request->all()
+        );
 
         return CursoResource::collection($cursos);
     }
@@ -36,7 +43,12 @@ class CursoController extends Controller
      */
     public function store(StoreCursoRequest $request)
     {
-        $curso = $this->service->crear($request->validated());
+        Gate::authorize('create', Curso::class);
+
+        $curso = $this->service->crear(
+            $request->user(),
+            $request->validated()
+        );
 
         return (new CursoResource($curso))
             ->response()
@@ -52,8 +64,15 @@ class CursoController extends Controller
      *
      * Obtiene la información de un curso específico.
      */
-    public function show(Curso $curso)
+    public function show(Request $request, Curso $curso)
     {
+        Gate::authorize('view', $curso);
+
+        $curso = $this->service->mostrar(
+            $request->user(),
+            $curso
+        );
+
         return new CursoResource($curso);
     }
 
@@ -66,7 +85,10 @@ class CursoController extends Controller
         UpdateCursoRequest $request,
         Curso $curso
     ) {
+        Gate::authorize('update', $curso);
+
         $curso = $this->service->actualizar(
+            $request->user(),
             $curso,
             $request->validated()
         );
@@ -84,9 +106,14 @@ class CursoController extends Controller
         'El curso tiene pendientes activos.',
         type: 'array{message: string}'
     )]
-    public function destroy(Curso $curso)
+    public function destroy(Request $request, Curso $curso)
     {
-        $this->service->eliminar($curso);
+        Gate::authorize('delete', $curso);
+
+        $this->service->eliminar(
+            $request->user(),
+            $curso
+        );
 
         return response()->noContent();
     }

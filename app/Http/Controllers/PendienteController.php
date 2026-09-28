@@ -10,6 +10,7 @@ use App\Http\Resources\ResumenEstadoResource;
 use App\Models\Pendiente;
 use App\Services\PendienteService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Dedoc\Scramble\Attributes\Response;
 
 class PendienteController extends Controller
@@ -27,7 +28,12 @@ class PendienteController extends Controller
      */
     public function index(Request $request)
     {
-        $pendientes = $this->service->listar($request->all());
+        Gate::authorize('viewAny', Pendiente::class);
+
+        $pendientes = $this->service->listar(
+            $request->user(),
+            $request->all()
+        );
 
         return PendienteResource::collection($pendientes);
     }
@@ -44,7 +50,12 @@ class PendienteController extends Controller
     )]
     public function store(StorePendienteRequest $request)
     {
-        $pendiente = $this->service->crear($request->validated());
+        Gate::authorize('create', Pendiente::class);
+
+        $pendiente = $this->service->crear(
+            $request->user(),
+            $request->validated()
+        );
 
         return (new PendienteResource($pendiente))
             ->response()
@@ -59,14 +70,14 @@ class PendienteController extends Controller
      * Crear pendiente con recordatorio
      *
      * Crea un pendiente junto con su recordatorio asociado.
-     *
-     * Este método se conserva como parte de la lógica desarrollada
-     * anteriormente, aunque no se expone actualmente mediante una ruta.
      */
     public function storeConRecordatorio(
         StorePendienteConRecordatorioRequest $request
     ) {
+        Gate::authorize('create', Pendiente::class);
+
         $pendiente = $this->service->crearConRecordatorio(
+            $request->user(),
             $request->validated()
         );
 
@@ -84,8 +95,17 @@ class PendienteController extends Controller
      *
      * Obtiene la información de un pendiente específico.
      */
-    public function show(Pendiente $pendiente)
-    {
+    public function show(
+        Request $request,
+        Pendiente $pendiente
+    ) {
+        Gate::authorize('view', $pendiente);
+
+        $pendiente = $this->service->mostrar(
+            $request->user(),
+            $pendiente
+        );
+
         return new PendienteResource($pendiente);
     }
 
@@ -103,7 +123,10 @@ class PendienteController extends Controller
         UpdatePendienteRequest $request,
         Pendiente $pendiente
     ) {
+        Gate::authorize('update', $pendiente);
+
         $pendiente = $this->service->actualizar(
+            $request->user(),
             $pendiente,
             $request->validated()
         );
@@ -116,9 +139,16 @@ class PendienteController extends Controller
      *
      * Elimina un pendiente existente.
      */
-    public function destroy(Pendiente $pendiente)
-    {
-        $this->service->eliminar($pendiente);
+    public function destroy(
+        Request $request,
+        Pendiente $pendiente
+    ) {
+        Gate::authorize('delete', $pendiente);
+
+        $this->service->eliminar(
+            $request->user(),
+            $pendiente
+        );
 
         return response()->noContent();
     }
@@ -128,9 +158,13 @@ class PendienteController extends Controller
      *
      * Obtiene la cantidad de pendientes agrupados por estado.
      */
-    public function resumenEstados()
+    public function resumenEstados(Request $request)
     {
-        $resumen = $this->service->resumenPorEstado();
+        Gate::authorize('viewAny', Pendiente::class);
+
+        $resumen = $this->service->resumenPorEstado(
+            $request->user()
+        );
 
         return ResumenEstadoResource::collection($resumen);
     }

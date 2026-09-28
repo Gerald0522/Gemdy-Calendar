@@ -14,11 +14,53 @@ class StoreRecordatorioRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'usuario_id' => ['required', 'integer', 'exists:usuarios,id'],
-            'titulo' => ['required', 'string', 'max:150'],
-            'descripcion' => ['nullable', 'string', 'max:1000'],
-            'fecha_recordatorio' => ['required', 'date'],
-            'hora_inicio' => ['required', 'date_format:H:i:s'],
+            /**
+             * Identificador del usuario propietario del recordatorio.
+             * @example 1
+             */
+            'usuario_id' => [
+                'required',
+                'integer',
+                'exists:usuarios,id'
+            ],
+
+            /**
+             * Título del recordatorio.
+             * @example Recordar entrega del proyecto
+             */
+            'titulo' => [
+                'required',
+                'string',
+                'max:150'
+            ],
+
+            /**
+             * Descripción del recordatorio.
+             * @example Revisar el proyecto antes de realizar la entrega.
+             */
+            'descripcion' => [
+                'nullable',
+                'string',
+                'max:1000'
+            ],
+
+            /**
+             * Fecha en la que se realizará el recordatorio.
+             * @example 2026-10-14
+             */
+            'fecha_recordatorio' => [
+                'required',
+                'date'
+            ],
+
+            /**
+             * Hora en la que se realizará el recordatorio.
+             * @example 18:00:00
+             */
+            'hora_inicio' => [
+                'required',
+                'date_format:H:i:s'
+            ],
         ];
     }
 
