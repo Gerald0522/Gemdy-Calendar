@@ -29,15 +29,15 @@ function addCell(row, text) {
     return cell;
 }
 
-// -----------------------------------------------------
-// Calendario: fechas reales y navegación accesible.
-// -----------------------------------------------------
+
+
+
 if ($("calendario-grid")) {
     const today = new Date();
     let selected = safeDate(today.getFullYear(), today.getMonth(), today.getDate());
     let view = safeDate(today.getFullYear(), today.getMonth(), 1);
 
-    // Actividades de ejemplo ancladas al mes inicial.
+
     const exampleEvents = [
         { day: 3, type: "clase", title: "Matemática Discreta" },
         { day: 7, type: "tarea", title: "Entrega de laboratorio" },
@@ -121,7 +121,6 @@ if ($("calendario-grid")) {
             grid.append(button);
         }
 
-        // Tras recrear los botones, conservar el foco en la fecha elegida.
         if (restoreFocus) {
             const active = [...grid.querySelectorAll("button.day")].find(
                 (button) => button.dataset.date === dateKey(selected)
@@ -172,9 +171,9 @@ if ($("calendario-grid")) {
     renderDetails();
 }
 
-// -----------------------------------------------------
+
 // Horario: validación nativa y validaciones complementarias.
-// -----------------------------------------------------
+
 if ($("horario-form")) {
     const form = $("horario-form");
     const blocks = [];
@@ -241,9 +240,8 @@ if ($("horario-form")) {
     renderSchedule();
 }
 
-// -----------------------------------------------------
 // Tareas: registro, estado y eliminación en memoria.
-// -----------------------------------------------------
+
 if ($("tarea-form")) {
     const form = $("tarea-form");
     const tasks = [];
