@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="es">
+    <head>
+        <meta charset="utf-8">
+        <meta content="width=device-width, initial-scale=1" name="viewport">
+        <meta content="#4F7CFF" name="theme-color">
+        <title>Tareas | GEMDY Calendar</title>
+        <link href="css/estilos.css" rel="stylesheet">
+        <script defer="" src="js/app.js"></script>
+    </head>
+    <body>
+        <a class="skip" href="#contenido">Saltar al contenido</a>
+        <div class="app">
+            <aside class="sidebar">
+                <a aria-label="GEMDY Calendar, inicio" class="brand" href="index.html"><span aria-hidden="true" class="brand-icon">▦</span><span>GEMDY<small>Calendar</small></span></a>
+                <p class="motto">Dale forma a tu tiempo</p>
+                <nav aria-label="Navegación principal">
+                    <a class="nav-link" href="calendario.html"><span aria-hidden="true">▦</span>Calendario</a>
+                    <a class="nav-link" href="horario.html"><span aria-hidden="true">▤</span>Generar horario</a>
+                    <a aria-current="page" class="nav-link active" href="tareas.html"><span aria-hidden="true">☑</span>Tareas</a>
+                </nav>
+                <div class="sidebar-bottom">
+                    <span>GEMDY Calendar</span>
+                </div>
+            </aside>
+            <div class="work">
+                <header class="topbar">
+                    <a class="mobile-brand" href="index.html">▦ GEMDY</a>
+                    <label class="search-label" for="buscar">Buscar</label>
+                    <input id="buscar" placeholder="Buscar (búsqueda no disponible)" type="search">
+                    <div class="user">
+                        Estudiante
+                        <span aria-hidden="true">◉</span>
+                    </div>
+                </header>
+                <main class="main" id="contenido" tabindex="-1">
+                    <div class="heading">
+                        <div>
+                            <p class="eyebrow">Mantén tus pendientes al día</p>
+                            <h1>Tareas</h1>
+                            <p class="muted">Registra y organiza tus entregas universitarias.</p>
+                        </div>
+                    </div>
+                    <div class="tasks-layout">
+                        <section aria-labelledby="tarea-form-titulo" class="card">
+                            <h2 id="tarea-form-titulo">Ingresar tarea</h2>
+                            <p class="muted">Completa los campos para registrar una tarea.</p>
+                            <form id="tarea-form">
+                                <fieldset class="form-group">
+                                    <legend>Datos de la tarea</legend>
+                                    <div class="field">
+                                        <label for="tarea-nombre">Nombre de la tarea<span aria-hidden="true">*</span></label>
+                                        <input aria-describedby="tarea-error" id="tarea-nombre" maxlength="80" minlength="3" name="nombre" placeholder="Ej. Entrega de informe" required="">
+                                    </div>
+                                    <div class="field">
+                                        <label for="tarea-curso">Curso o materia<span aria-hidden="true">*</span></label>
+                                        <input aria-describedby="tarea-error" id="tarea-curso" name="curso" placeholder="Ej. Bases de Datos" required="">
+                                    </div>
+                                    <div class="field">
+                                        <label for="tarea-fecha">Fecha de entrega<span aria-hidden="true">*</span></label>
+                                        <input aria-describedby="tarea-error" id="tarea-fecha" name="fecha" required="" type="date">
+                                    </div>
+                                    <div class="field">
+                                        <label for="tarea-prioridad">Prioridad<span aria-hidden="true">*</span></label>
+                                        <select aria-describedby="tarea-error" id="tarea-prioridad" name="prioridad" required="">
+                                            <option value="">Seleccionar</option>
+                                            <option value="Alta">Alta</option>
+                                            <option value="Media">Media</option>
+                                            <option value="Baja">Baja</option>
+                                        </select>
+                                    </div>
+                                    <div class="field">
+                                        <label for="tarea-descripcion">Descripción (opcional)</label>
+                                        <textarea id="tarea-descripcion" maxlength="250" name="descripcion" placeholder="Detalles adicionales" rows="3"></textarea>
+                                    </div>
+                                </fieldset>
+                                <p aria-live="assertive" class="form-error" hidden="" id="tarea-error" role="alert"></p>
+                                <button class="button full" type="submit">Registrar tarea</button>
+                            </form>
+                        </section>
+                        <section aria-labelledby="lista-tareas-titulo" class="card">
+                            <div class="section-head">
+                                <div>
+                                    <h2 id="lista-tareas-titulo">Tareas registradas</h2>
+                                    <p class="muted">Consulta, completa o elimina tus tareas.</p>
+                                </div>
+                                <span class="counter" id="tarea-contador">0 tareas</span>
+                            </div>
+                            <div class="table-scroll">
+                                <table>
+                                    <caption class="sr-only">Listado de tareas registradas</caption>
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">Tarea</th>
+                                            <th scope="col">Curso</th>
+                                            <th scope="col">Entrega</th>
+                                            <th scope="col">Prioridad</th>
+                                            <th scope="col">Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tareas-lista"></tbody>
+                                </table>
+                            </div>
+                            <p class="empty" id="tareas-vacio">No hay tareas registradas. Crea la primera usando el formulario.</p>
+                        </section>
+                    </div>
+                </main>
+                <footer class="footer">© 2026 GEMDY Calendar</footer>
+            </div>
+        </div>
+    </body>
+</html>

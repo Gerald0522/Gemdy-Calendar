@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="es">
+    <head>
+        <meta charset="utf-8">
+        <meta content="width=device-width, initial-scale=1" name="viewport">
+        <meta content="#4F7CFF" name="theme-color">
+        <title>Calendario | GEMDY Calendar</title>
+        <link href="css/estilos.css" rel="stylesheet">
+        <script defer="" src="js/app.js"></script>
+    </head>
+    <body>
+        <a class="skip" href="#contenido">Saltar al contenido</a>
+        <div class="app">
+            <aside class="sidebar">
+                <a aria-label="GEMDY Calendar, inicio" class="brand" href="index.html"><span aria-hidden="true" class="brand-icon">▦</span><span>GEMDY<small>Calendar</small></span></a>
+                <p class="motto">Dale forma a tu tiempo</p>
+                <nav aria-label="Navegación principal">
+                    <a aria-current="page" class="nav-link active" href="calendario.html"><span aria-hidden="true">▦</span>Calendario</a>
+                    <a class="nav-link" href="horario.html"><span aria-hidden="true">▤</span>Generar horario</a>
+                    <a class="nav-link" href="tareas.html"><span aria-hidden="true">☑</span>Tareas</a>
+                </nav>
+                <div class="sidebar-bottom">
+                    <span>GEMDY Calendar</span>
+                </div>
+            </aside>
+            <div class="work">
+                <header class="topbar">
+                    <a class="mobile-brand" href="index.html">▦ GEMDY</a>
+                    <label class="search-label" for="buscar">Buscar</label>
+                    <input id="buscar" placeholder="Buscar (búsqueda no disponible)" type="search">
+                    <div class="user">
+                        Estudiante
+                        <span aria-hidden="true">◉</span>
+                    </div>
+                </header>
+                <main class="main" id="contenido" tabindex="-1">
+                    <div class="heading">
+                        <div>
+                            <p class="eyebrow">Organiza tu semana</p>
+                            <h1>Calendario</h1>
+                            <p class="muted">Visualiza tus clases, tareas y actividades.</p>
+                        </div>
+                        <button class="button" id="hoy" type="button">Ir a hoy</button>
+                    </div>
+                    <section aria-labelledby="titulo-cal" class="card calendar-card">
+                        <div class="calendar-toolbar">
+                            <div class="row">
+                                <button aria-label="Mes anterior" class="icon-button" id="anterior">‹</button>
+                                <button aria-label="Mes siguiente" class="icon-button" id="siguiente">›</button>
+                                <h2 aria-live="polite" id="titulo-cal"></h2>
+                            </div>
+                            <div class="legend">
+                                <span class="pill clase">Clases</span>
+                                <span class="pill tarea">Tareas</span>
+                                <span class="pill examen">Exámenes</span>
+                                <span class="pill actividad">Actividades</span>
+                                <span class="pill estudio">Estudio</span>
+                            </div>
+                        </div>
+                        <div class="calendar-scroll">
+                            <div aria-label="Calendario mensual" class="month-grid" id="calendario-grid" role="grid"></div>
+                        </div>
+                        <p class="muted help">Selecciona un día para consultar sus actividades de ejemplo.</p>
+                    </section>
+                    <section aria-labelledby="titulo-dia" class="card details">
+                        <h2 id="titulo-dia">Actividades del día</h2>
+                        <div aria-live="polite" id="detalle-dia">
+                            <p class="muted">Selecciona un día del calendario.</p>
+                        </div>
+                    </section>
+                </main>
+                <footer class="footer">© 2026 GEMDY Calendar</footer>
+            </div>
+        </div>
+    </body>
+</html>
