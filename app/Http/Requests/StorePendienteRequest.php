@@ -38,12 +38,12 @@ class StorePendienteRequest extends FormRequest
              * Título del pendiente.
              * @example Entregar proyecto de Desarrollo de Software
              */
-            'titulo' => [
-                'required',
-                'string',
-                'max:150',
-            ],
-
+          'titulo' => [
+    'required',
+    'string',
+    'min:3',
+    'max:150',
+],
             /**
              * Descripción del pendiente.
              * @example Completar y entregar el proyecto final del curso.
@@ -96,6 +96,7 @@ class StorePendienteRequest extends FormRequest
 
             'titulo.required' => 'El título es obligatorio.',
             'titulo.string' => 'El título debe ser texto.',
+            'titulo.min' => 'El título debe contener al menos 3 caracteres.',
             'titulo.max' => 'El título no puede superar los 150 caracteres.',
 
             'descripcion.string' => 'La descripción debe ser texto.',
