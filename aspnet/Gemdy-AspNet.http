@@ -1,0 +1,6 @@
+@Gemdy_AspNet_HostAddress = http://localhost:5022
+
+GET {{Gemdy_AspNet_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
