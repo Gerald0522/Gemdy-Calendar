@@ -35,3 +35,7 @@ Thumbs.db
 *.user
 *.suo
 **/publish/
+
+# Entregables y archivos locales del laboratorio
+/docs/lab11/
+/tmp/
