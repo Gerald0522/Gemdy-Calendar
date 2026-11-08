@@ -9,7 +9,6 @@ import { clearSession, session, sessionActive } from './services/session';
 
 const ionRouter = useIonRouter();
 let expirationTimer: ReturnType<typeof setInterval>;
-// Nunca se atraviesa el límite de sesión al pulsar Atrás en Android.
 useBackButton(10, () => {
   const path = router.currentRoute.value.path;
   if (path === '/pendientes' || path === '/login') {

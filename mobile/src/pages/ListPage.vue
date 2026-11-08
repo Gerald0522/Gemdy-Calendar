@@ -39,7 +39,7 @@ async function load(page = 1, event?: RefresherCustomEvent) {
 async function logout() {
   loading.value = true;
   try { await api('/auth/logout', { method: 'POST' }); }
-  catch { /* También se permite cerrar la sesión local sin red. */ }
+  catch {}
   finally {
     await clearSession().catch(() => {});
     listado.value = null;

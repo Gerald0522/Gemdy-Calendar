@@ -12,10 +12,9 @@ export async function consultarListado(page = 1): Promise<{ listado: Listado; fe
     const fecha = new Date().toISOString();
     try {
       await Preferences.set({ key: 'gemdy-listado', value: JSON.stringify({ usuarioId, listado, fecha }) });
-    } catch { /* La respuesta en línea sigue siendo utilizable si falla la caché. */ }
+    } catch {}
     return { listado, fecha, obsoleto: false };
   } catch (error) {
-    // Los errores HTTP de autorización/validación no se ocultan con datos antiguos.
     if (error instanceof ApiError) throw error;
     const { value } = await Preferences.get({ key: 'gemdy-listado' });
     if (value) {
@@ -24,7 +23,7 @@ export async function consultarListado(page = 1): Promise<{ listado: Listado; fe
         if (cache.usuarioId === session.value?.usuario.id && Array.isArray(cache.listado?.data)) {
           return { listado: cache.listado, fecha: cache.fecha, obsoleto: true };
         }
-      } catch { /* Caché inválida: mostrar el error original y permitir reintentar. */ }
+      } catch {}
     }
     throw error;
   }

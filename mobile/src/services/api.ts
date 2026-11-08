@@ -13,7 +13,6 @@ export function setUnauthorizedHandler(handler: () => Promise<unknown>): void {
 
 export const apiBase = (import.meta.env.VITE_API_URL || 'http://10.0.2.2:8000/api').replace(/\/$/, '');
 
-// Único punto de acceso: token, timeout, errores y respuesta 401.
 export async function api<T>(path: string, options: RequestInit = {}): Promise<T> {
   if (session.value && !sessionActive()) {
     try { await clearSession(); } finally { await onUnauthorized(); }

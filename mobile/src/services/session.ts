@@ -14,8 +14,6 @@ export function sessionActive(): boolean {
 }
 
 export async function saveSession(value: Session): Promise<void> {
-  // La implementación web del complemento usa localStorage. Nunca se invoca.
-  // En navegador, la sesión vive únicamente en memoria hasta recargar.
   if (Capacitor.isNativePlatform()) await SecureStorage.set(sessionKey, { ...value });
   session.value = value;
   restorePromise = Promise.resolve();
@@ -36,7 +34,6 @@ export function restoreSession(): Promise<void> {
 
 export async function clearSession(): Promise<void> {
   session.value = null;
-  // La sesión queda inactiva incluso si falla una limpieza nativa.
   await Promise.all([
     Capacitor.isNativePlatform() ? SecureStorage.remove(sessionKey) : Promise.resolve(),
     Preferences.remove({ key: 'gemdy-listado' }),
