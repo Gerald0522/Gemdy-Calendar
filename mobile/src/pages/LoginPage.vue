@@ -29,11 +29,12 @@ async function login() {
 
 <template>
   <ion-page>
-    <ion-header><ion-toolbar><ion-title>Gemdy Calendar</ion-title></ion-toolbar></ion-header>
+    <ion-header><ion-toolbar><ion-title>GEMDY Calendar</ion-title></ion-toolbar></ion-header>
     <ion-content class="ion-padding">
       <main class="page-width login-content">
-        <p class="eyebrow">TU AGENDA ACADÉMICA</p><h1>Iniciar sesión</h1>
-        <p>Consulta tus pendientes y organiza tus entregas.</p>
+        <div class="brand"><span class="brand-icon" aria-hidden="true">▦</span><span>GEMDY<small>Calendar</small></span></div><p class="motto">Dale forma a tu tiempo</p>
+        <p class="eyebrow">Tu agenda académica</p><h1>Iniciar sesión</h1>
+        <p class="muted">Consulta tus tareas y organiza tus entregas.</p>
         <ion-card><ion-card-content>
           <form @submit.prevent="login">
             <ion-input v-model="correo" label="Correo electrónico" label-placement="stacked" type="email" autocomplete="username" required :disabled="loading" />

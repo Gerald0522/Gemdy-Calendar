@@ -7,8 +7,11 @@ export const router = createRouter({
   routes: [
     { path: '/', redirect: '/pendientes' },
     { path: '/login', component: () => import('./pages/LoginPage.vue') },
+    { path: '/calendario', component: () => import('./pages/CalendarPage.vue'), meta: { private: true } },
+    { path: '/horario', component: () => import('./pages/SchedulePage.vue'), meta: { private: true } },
     { path: '/pendientes', component: () => import('./pages/ListPage.vue'), meta: { private: true } },
     { path: '/pendientes/nuevo', component: () => import('./pages/FormPage.vue'), meta: { private: true } },
+    { path: '/pendientes/:id/editar', component: () => import('./pages/FormPage.vue'), meta: { private: true } },
     { path: '/pendientes/:id', component: () => import('./pages/DetailPage.vue'), meta: { private: true } },
     { path: '/:pathMatch(.*)*', redirect: '/pendientes' },
   ],

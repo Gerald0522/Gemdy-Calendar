@@ -37,6 +37,7 @@ export async function clearSession(): Promise<void> {
   await Promise.all([
     Capacitor.isNativePlatform() ? SecureStorage.remove(sessionKey) : Promise.resolve(),
     Preferences.remove({ key: 'gemdy-listado' }),
+    Preferences.remove({ key: 'gemdy-calendario' }),
     Capacitor.isNativePlatform()
       ? LocalNotifications.getPending().then(({ notifications }) => {
         if (notifications.length > 0) return LocalNotifications.cancel({ notifications });

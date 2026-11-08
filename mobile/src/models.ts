@@ -25,3 +25,12 @@ export interface CacheListado {
   fecha: string;
   listado: Listado;
 }
+
+export interface BloqueHorario {
+  id: string;
+  nombre: string;
+  tipo: 'clase' | 'estudio' | 'actividad';
+  dias: number[];
+  inicio: string;
+  fin: string;
+}

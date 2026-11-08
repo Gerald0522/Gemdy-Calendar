@@ -34,7 +34,8 @@ vi.mock('@capacitor/local-notifications', () => ({ LocalNotifications: {
 
 import { api, ApiError, setUnauthorizedHandler } from '../src/services/api';
 import { clearSession, saveSession, session } from '../src/services/session';
-import { consultarListado } from '../src/services/pendientes';
+import { consultarListado, consultarCalendario } from '../src/services/pendientes';
+import { consultarHorario, guardarHorario, validarBloque } from '../src/services/horario';
 import { connected } from '../src/services/network';
 import { programarRecordatorio } from '../src/services/notifications';
 import type { Session, Pendiente } from '../src/models';
@@ -52,6 +53,49 @@ beforeEach(() => {
   session.value = null; connected.value = true;
   setUnauthorizedHandler(async () => {});
   vi.stubGlobal('fetch', vi.fn());
+});
+
+describe('Calendario y horario móvil', () => {
+  it('reúne todas las páginas y conserva el calendario sin conexión', async () => {
+    await saveSession(activeSession());
+    vi.mocked(fetch)
+      .mockResolvedValueOnce(new Response(JSON.stringify({ data: [item], meta: { last_page: 2 } })))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ data: [{ ...item, id: 6 }], meta: { last_page: 2 } })));
+    expect((await consultarCalendario()).pendientes).toHaveLength(2);
+    connected.value = false;
+    const cached = await consultarCalendario();
+    expect(cached.pendientes).toHaveLength(2);
+    expect(cached.obsoleto).toBe(true);
+    expect(cached.fecha).toBeTruthy();
+    expect(fetch).toHaveBeenCalledTimes(2);
+  });
+  it('no muestra el calendario de otra cuenta ni oculta un 401 con la caché', async () => {
+    await saveSession(activeSession());
+    mocks.preferences.set('gemdy-calendario', JSON.stringify({ usuarioId: 2, pendientes: [item], fecha: '2026-11-07' }));
+    connected.value = false;
+    await expect(consultarCalendario()).rejects.toThrow();
+    connected.value = true;
+    vi.mocked(fetch).mockResolvedValue(new Response('{}', { status: 401 }));
+    await expect(consultarCalendario()).rejects.toMatchObject({ status: 401 });
+    expect(mocks.preferences.has('gemdy-calendario')).toBe(false);
+  });
+  it('rechaza horarios sin días, horas invertidas y actividades que se solapan', () => {
+    const block = { nombre: 'Matemática', tipo: 'clase' as const, dias: [0], inicio: '08:00', fin: '09:00' };
+    expect(validarBloque({ ...block, dias: [] }, [])).toContain('día');
+    expect(validarBloque({ ...block, fin: '07:00' }, [])).toContain('posterior');
+    expect(validarBloque(block, [{ ...block, id: '1' }])).toContain('coincide');
+    expect(validarBloque({ ...block, inicio: '09:00', fin: '10:00' }, [{ ...block, id: '1' }])).toBe('');
+  });
+  it('guarda el horario por usuario y lo conserva al volver a entrar', async () => {
+    await saveSession(activeSession());
+    const blocks = [{ id: '1', nombre: 'Estudio', tipo: 'estudio' as const, dias: [2], inicio: '08:00', fin: '09:00' }];
+    await guardarHorario(blocks);
+    await clearSession();
+    await saveSession({ ...activeSession(), usuario: { ...activeSession().usuario, id: 2 } });
+    expect(await consultarHorario()).toEqual([]);
+    await saveSession(activeSession());
+    expect(await consultarHorario()).toEqual(blocks);
+  });
 });
 
 describe('Sesión e intercepción centralizada', () => {
