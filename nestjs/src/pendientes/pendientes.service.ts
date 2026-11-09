@@ -27,6 +27,7 @@ export class PendientesService {
   orden?: string,
   direccion?: string,
   proximos?: boolean,
+  buscar?: string,
 ) {
   page = Math.max(1, page);
   perPage = Math.min(Math.max(1, perPage), 50);
@@ -48,6 +49,13 @@ export class PendientesService {
       'pendiente.estado = :estado',
       { estado },
     );
+  }
+
+  if (buscar) {
+  query.andWhere(
+    'pendiente.titulo LIKE :buscar',
+    { buscar: `%${buscar}%` },
+  );
   }
 
 
