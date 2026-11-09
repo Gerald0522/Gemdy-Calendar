@@ -1,0 +1,113 @@
+:root {
+  --ion-safe-area-top: var(--safe-area-inset-top, env(safe-area-inset-top, 0px));
+  --ion-safe-area-bottom: var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px));
+  --ion-safe-area-left: var(--safe-area-inset-left, env(safe-area-inset-left, 0px));
+  --ion-safe-area-right: var(--safe-area-inset-right, env(safe-area-inset-right, 0px));
+  --ion-color-primary: #3b64e8;
+  --ion-color-primary-rgb: 59, 100, 232;
+  --ion-color-primary-contrast: #ffffff;
+  --ion-color-primary-shade: #2f5bd9;
+  --ion-color-primary-tint: #4f7cff;
+  --ion-color-warning: #865500;
+  --ion-color-warning-rgb: 134, 85, 0;
+  --ion-color-warning-contrast: #ffffff;
+  --ion-color-success: #24724e;
+  --ion-color-danger: #ac3028;
+  --ion-color-medium: #667085;
+  --ion-background-color: #f6f8fc;
+  --ion-text-color: #172033;
+  --ion-font-family: "Instrument Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --surface: #ffffff;
+  --border: #e7eaf0;
+  --muted: #667085;
+  --soft: #eaf0ff;
+}
+* { box-sizing: border-box; }
+ion-toolbar { --background: var(--surface); --color: #172033; --border-color: var(--border); }
+ion-title { font-size: 1rem; font-weight: 750; }
+ion-content { --padding-bottom: max(1.5rem, var(--ion-safe-area-bottom)); }
+.page-width, .app-navigation { width: 100%; max-width: 75rem; margin-inline: auto; padding-inline: var(--ion-safe-area-left) var(--ion-safe-area-right); }
+.page-width { padding-block: 1.5rem; }
+.login-content { max-width: 32rem; padding-top: clamp(1rem, 6vh, 4rem); }
+.app-navigation { background: var(--surface); border: 1px solid var(--border); border-radius: 1rem; padding: 1rem; }
+.brand { display: flex; gap: .6rem; align-items: center; font-weight: 800; letter-spacing: .02em; }
+.brand small { display: block; font-size: .75rem; font-weight: 500; }
+.brand-icon { display: grid; place-items: center; width: 2.25rem; height: 2.25rem; border-radius: .6rem; background: var(--soft); color: #2f5bd9; font-size: 1.5rem; }
+.motto { font-family: "Instrument Serif", Georgia, serif; font-style: italic; color: var(--muted); margin-block: .75rem; }
+.app-navigation nav { display: flex; flex-wrap: wrap; gap: .5rem; }
+.app-navigation a { display: flex; align-items: center; min-height: 2.75rem; padding: .65rem .85rem; border-radius: .75rem; font-size: .9rem; font-weight: 600; color: #475467; text-decoration: none; }
+.app-navigation a.active { background: var(--soft); color: #2f5bd9; }
+.eyebrow { color: #2f5bd9; font-size: .85rem; font-weight: 700; margin: 0 0 .4rem; }
+.login-content > .eyebrow { margin-top: 2rem; }
+h1 { font-size: clamp(1.65rem, 4vw, 2rem); line-height: 1.2; font-weight: 750; margin: 0 0 .5rem; }
+h2 { font-size: 1.2rem; line-height: 1.4; font-weight: 700; margin: 0 0 .75rem; }
+h3 { font-size: 1rem; margin-block: .75rem .5rem; }
+.muted { color: var(--muted); line-height: 1.5; margin: .25rem 0 1rem; }
+.page-heading, .section-heading, .calendar-toolbar, .actions { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: .75rem; }
+.page-heading { margin-bottom: 1.5rem; }
+.page-heading .muted { margin-bottom: 0; }
+.section-heading { margin-bottom: .75rem; }
+.section-heading h2, .calendar-toolbar h2 { margin: 0; }
+.surface, ion-card { background: var(--surface); border: 1px solid var(--border); border-radius: 1rem; box-shadow: 0 .25rem 1.25rem rgb(23 32 51 / 6%); min-width: 0; }
+.surface { padding: 1rem; }
+ion-card { margin: 1.25rem 0; --background: var(--surface); }
+ion-card-header, ion-card-content { padding: 1.25rem; }
+ion-card-title { font-size: 1.4rem; font-weight: 700; }
+ion-input, ion-textarea, ion-select { margin-block: .75rem 1.25rem; --background: #ffffff; --border-color: #cbd2df; --highlight-color-focused: #2f5bd9; min-width: 0; }
+ion-input, ion-textarea { --padding-start: .75rem; --padding-end: .75rem; border: 1px solid #cbd2df; border-radius: .7rem; }
+ion-select { --padding-start: .75rem; --padding-end: .75rem; }
+ion-card-content > p { margin-block: 1rem; }
+ion-button { min-height: 2.75rem; height: auto; white-space: normal; --border-radius: 999px; --box-shadow: none; font-size: .9rem; font-weight: 650; text-transform: none; letter-spacing: normal; }
+ion-button::part(native) { padding-block: .7rem; }
+ion-button[fill="outline"] { --border-color: #cbd2df; --border-width: 1px; }
+ion-back-button { font-size: .9rem; }
+ion-list { background: transparent; padding: 0; }
+ion-item { --background: transparent; --border-color: var(--border); --padding-start: 0; --inner-padding-end: .25rem; --min-height: 5rem; }
+ion-label h2, ion-card-title, p, h1, h2, h3 { overflow-wrap: anywhere; }
+ion-label h2 { font-weight: 650 !important; }
+ion-label p { color: var(--muted) !important; margin-block: .4rem !important; }
+ion-badge, .counter { border-radius: 999px; padding: .35rem .65rem; font-size: .75rem; background: #f0edff; color: #5845bd; }
+ion-badge.completado, ion-badge.actividad { background: #eaf9f2; color: #24724e; }
+ion-badge.en_progreso, ion-badge.clase { background: var(--soft); color: #2f5bd9; }
+.data-state { padding: 1.5rem .25rem; text-align: center; }
+.pagination { display: flex; justify-content: space-between; align-items: center; gap: .5rem; margin-top: 1.25rem; flex-wrap: wrap; }
+.calendar-layout, .schedule-layout { display: grid; gap: 1rem; grid-template-columns: minmax(0, 1fr); align-items: start; }
+.calendar-toolbar { flex-wrap: nowrap; gap: .25rem; margin-bottom: 1rem; }
+.calendar-toolbar h2 { flex: 1; min-width: 0; font-size: 1rem; text-align: center; text-transform: capitalize; }
+.calendar-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: .2rem; }
+.weekday { text-align: center; font-size: .65rem; color: #475467; padding-block: .5rem; }
+.calendar-day { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .25rem; min-height: 2.75rem; padding: .3rem 0; border: 1px solid var(--border); border-radius: .55rem; color: #172033; background: var(--surface); font: inherit; font-size: .8rem; cursor: pointer; }
+.calendar-day.outside { color: #667085; background: #f6f8fc; }
+.calendar-day.today { font-weight: 800; border-color: #4f7cff; }
+.calendar-day.selected { background: var(--soft); border: 2px solid #4f7cff; color: #2f5bd9; }
+.task-dot { display: inline-block; width: .35rem; height: .35rem; border-radius: 50%; background: #8264db; }
+.calendar-legend { margin-top: 1rem; margin-bottom: 0; font-size: .8rem; }
+.day-selector { padding: .75rem; margin: 1rem 0; border: 1px solid var(--border); border-radius: .75rem; }
+.day-selector legend { font-size: .9rem; font-weight: 600; }
+.day-selector > div { display: flex; flex-wrap: wrap; gap: 1rem; }
+.day-selector ion-checkbox { min-height: 2.75rem; font-size: .9rem; }
+.form-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0 1rem; }
+.actions { justify-content: flex-start; }
+.schedule-block { border-top: 1px solid var(--border); margin-top: 1rem; padding-top: 1rem; }
+.schedule-block p { margin-block: .4rem; color: #475467; }
+:focus-visible { outline: .2rem solid #2f5bd9; outline-offset: .2rem; }
+.skip-link { position: absolute; left: 1rem; top: -10rem; padding: 1rem; color: #ffffff; background: #172033; z-index: 10; }
+.skip-link:focus { top: 1rem; }
+ion-button::part(native):focus-visible, ion-input::part(native):focus-visible, ion-textarea::part(native):focus-visible { outline: .2rem solid #2f5bd9; outline-offset: .15rem; }
+@media (min-width: 36rem) {
+  .surface { padding: 1.5rem; }
+  .form-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .calendar-grid { gap: .5rem; }
+  .calendar-day { min-height: 3.5rem; }
+  .weekday { font-size: .8rem; }
+}
+@media (min-width: 48rem) {
+  .app-navigation { display: grid; grid-template-columns: auto 1fr; gap: .25rem 2rem; align-items: center; }
+  .app-navigation nav { grid-column: 2; grid-row: 1 / 3; justify-content: flex-end; }
+  .app-navigation .motto { margin: .25rem 0; }
+  .calendar-layout { grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); }
+}
+@media (min-width: 75rem) {
+  .schedule-layout { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .calendar-day { min-height: 4.5rem; }
+}
