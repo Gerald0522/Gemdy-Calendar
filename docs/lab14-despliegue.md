@@ -16,7 +16,7 @@ flowchart LR
     Android["Ionic · APK firmado"] -->|HTTPS| API
     API -->|PostgreSQL con TLS| DB["PostgreSQL · Aiven Free"]
     CI["GitHub Actions"] -->|Deploy Hook| API
-    CI -->|Direct Upload| Web
+    GitHub["GitHub · main"] -->|Compilación de Pages| Web
 ```
 
 ## Entornos y despliegue
@@ -25,8 +25,8 @@ En desarrollo usar `.env.example` como base para `.env`. La web que sirve Larave
 
 1. En Aiven se creó el servicio PostgreSQL Free `pg-2c7ef480`. Descargar su certificado público a `certs/aiven-ca.pem` y añadir el certificado al repositorio.
 2. En Render crear un Web Service Docker desde la raíz del repositorio, con puerto `8080`, verificación en `/up` y Auto-Deploy desactivado. El contenedor arranca como `www-data`, valida el entorno, ejecuta las migraciones y genera las cachés de Laravel.
-3. En Cloudflare Pages crear un proyecto de carga directa cuya rama de producción sea `main`. Así, el mismo resultado de pruebas condiciona la publicación de la web y la API. [Documentación de Cloudflare Pages](https://developers.cloudflare.com/pages/how-to/use-direct-upload-with-continuous-integration/)
-4. En GitHub Actions registrar `RENDER_DEPLOY_HOOK`, `CLOUDFLARE_API_TOKEN` y `CLOUDFLARE_ACCOUNT_ID` como secretos. Configurar `CLOUDFLARE_PAGES_PROJECT` con el nombre del proyecto Pages y `VITE_API_URL` con `https://<api>.onrender.com/api` como variables del repositorio.
+3. En Cloudflare Pages conectar el repositorio GitHub y elegir `main` como rama de producción. Usar la raíz del repositorio, el comando `npm --prefix mobile ci && npm --prefix mobile run build:web`, el directorio de salida `dist-web` y las variables `NODE_VERSION=22` y `VITE_API_URL=https://gemdy-calendar.onrender.com/api`.
+4. Registrar `RENDER_DEPLOY_HOOK` como secreto de GitHub Actions y `VITE_API_URL` como variable del repositorio. El trabajo `deploy` llama al hook de Render únicamente después de que pasen las pruebas y la compilación web.
 
 | Variables de Render | Valores |
 | --- | --- |
@@ -69,5 +69,5 @@ Para esta compilación se usó Gradle 8.14.3. Gradle 9.7.1, definido en el wrapp
 - **Migraciones:** Render registró la creación de la tabla de migraciones, la ejecución de migraciones en PostgreSQL y el inicio exitoso del servicio. [Registro del despliegue inicial](https://dashboard.render.com/web/srv-dbvrsgnf3r2c73fui350/deploys/dep-dbvrsh7f3r2c73fui4u0)
 - **Publicación inicial:** Render construyó desde `codex/lab14-despliegue`. Cloudflare Pages recibió el ZIP de la compilación de producción mediante carga directa. Sigue pendiente activar la publicación automática desde `main`.
 - **Acción exitosa:** pendiente el enlace de la ejecución de `main` con los trabajos `api`, `web` y `deploy` en verde, más el estado del despliegue en Render.
-- **Acción detenida:** pendiente el enlace a un PR de prueba con una aserción temporal que falle. Comprobar el fallo en Actions y que no se inició ningún despliegue. Retirar la aserción antes de integrar el PR.
+- **Acción detenida:** la prueba deliberadamente fallida se ejecutó en una rama de evidencia. GitHub Actions registró `api` fallido, `web` exitoso y `deploy` omitido. [Ejecución de GitHub Actions](https://github.com/Gerald0522/Gemdy-Calendar/actions/runs/44669986165)
 - **Secretos:** revisar que la web compilada solo contiene la URL pública de la API y que el repositorio y la imagen excluyen los archivos de entorno y de firma.
