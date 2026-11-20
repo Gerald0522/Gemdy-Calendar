@@ -22,6 +22,9 @@ return Application::configure(basePath: dirname(__DIR__))
     )
 
     ->withMiddleware(function (Middleware $middleware): void {
+        if (env('APP_ENV') === 'production') {
+            $middleware->trustProxies(at: '*');
+        }
 
         // La aplicación trabaja como API.
         // Si un usuario no está autenticado, no intenta

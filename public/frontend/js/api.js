@@ -8,7 +8,7 @@ export class ApiError extends Error {
 }
 
 export class ApiClient {
-    constructor(baseUrl = "/api", token = sessionStorage.getItem("gemdy_token")) {
+    constructor(baseUrl = import.meta.env?.VITE_API_URL?.replace(/\/$/, "") || "/api", token = sessionStorage.getItem("gemdy_token")) {
         this.baseUrl = baseUrl;
         this.token = token;
     }

@@ -3,6 +3,10 @@
 .env
 .env.backup
 .env.production
+*.jks
+*.keystore
+*.p12
+/dist-web/
 .phpactor.json
 .phpunit.result.cache
 /.codex

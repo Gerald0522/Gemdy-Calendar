@@ -1,0 +1,82 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  api:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          extensions: pdo_sqlite, mbstring
+      - run: composer install --no-interaction --prefer-dist
+      - run: cp .env.example .env && php artisan key:generate
+      - run: php artisan test
+      - run: docker build -t gemdy-api .
+      - run: docker image inspect gemdy-api --format '{{.Size}} bytes'
+
+  web:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: mobile
+    env:
+      VITE_API_URL: ${{ vars.VITE_API_URL }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: mobile/package-lock.json
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
+      - name: Compilar la web
+        run: |
+          if [[ "$GITHUB_EVENT_NAME" == push && ! "$VITE_API_URL" =~ ^https://[^/]+/api/?$ ]]; then
+            echo 'Configura VITE_API_URL con la URL HTTPS de la API y el sufijo /api.'
+            exit 1
+          fi
+          npm run build:web
+          du -sb ../dist-web
+      - uses: actions/upload-artifact@v4
+        with:
+          name: web
+          path: dist-web/
+          if-no-files-found: error
+
+  deploy:
+    needs: [api, web]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    concurrency:
+      group: production
+    steps:
+      - name: Solicitar despliegue en Render
+        env:
+          RENDER_DEPLOY_HOOK: ${{ secrets.RENDER_DEPLOY_HOOK }}
+        run: |
+          test -n "$RENDER_DEPLOY_HOOK" || { echo 'Falta RENDER_DEPLOY_HOOK.'; exit 1; }
+          curl -fsS -X POST "${RENDER_DEPLOY_HOOK}&ref=${GITHUB_SHA}" --output /dev/null
+      - uses: actions/download-artifact@v4
+        with:
+          name: web
+          path: dist-web
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Publicar la web en Cloudflare Pages
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy dist-web --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch=main
