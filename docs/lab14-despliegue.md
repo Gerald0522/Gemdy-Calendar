@@ -1,5 +1,9 @@
 # Laboratorio 14 · Despliegue de Gemdy Calendar
 
+- Web pública: https://gemdy-calendar.pages.dev/
+- API pública: https://gemdy-calendar.onrender.com/api
+- Estado de la API: https://gemdy-calendar.onrender.com/up
+
 ## Arquitectura
 
 La web de Cloudflare Pages y la app Ionic para Android consumen la API Laravel mediante HTTPS y tokens Bearer de Sanctum. Render ejecuta la API en Docker y esta se conecta a PostgreSQL en Aiven mediante TLS. GitHub Actions prueba Laravel con SQLite en memoria, prueba Ionic, compila los clientes y construye la imagen. El trabajo de despliegue solo se ejecuta en un push a `main` cuando los dos trabajos anteriores terminan correctamente.
@@ -37,10 +41,12 @@ En desarrollo usar `.env.example` como base para `.env`. La web que sirve Larave
 
 | Artefacto | Construcción | Tamaño |
 | --- | --- | --- |
-| Web, `dist-web/` | `npm --prefix mobile ci` y `npm --prefix mobile run build:web` con `VITE_API_URL` | 48 280 bytes en la compilación local. CI registra el tamaño con la URL pública. |
-| Imagen de la API | `docker build -t gemdy-api .` | 260 047 286 bytes según `docker image inspect` en la compilación local. |
-| Compilación de Ionic, `mobile/dist/` | `npm --prefix mobile run build` | 1 249 690 bytes en la compilación local. |
-| APK de distribución | Compilación y firma de Android | Pendiente. |
+| Web, `dist-web/` | `npm --prefix mobile ci` y `npm --prefix mobile run build:web` con `VITE_API_URL` | 48 294 bytes en producción, 16 895 bytes en el ZIP de carga. |
+| Imagen de la API | `docker build -t gemdy-api .` | 260 047 286 bytes en la compilación local inicial. CI registra el tamaño de cada nueva imagen. |
+| Compilación de Ionic, `mobile/dist/` | `npm --prefix mobile run build` | 1 249 705 bytes con la API pública. |
+| APK de distribución | Compilación y firma de Android | 3 540 348 bytes. Firma Android v2 y v3 verificada. |
+
+El APK está disponible en [GitHub Releases](https://github.com/Gerald0522/Gemdy-Calendar/releases/tag/v1.0.0-lab14). SHA-256 del archivo: `0d9da01bd830561d19d44997ede6075006e697875db3dd5ae1a67d8f311b65ca`.
 
 ## APK firmado
 
@@ -54,11 +60,14 @@ npx cap sync android
 
 En Android Studio abrir `mobile/android` y usar **Build → Generate Signed Bundle / APK → APK → release**. Usar el almacén de claves del equipo o crearlo una sola vez y conservarlo fuera del repositorio. Verificar el APK con `apksigner verify --verbose <archivo.apk>`, medir el archivo y adjuntarlo a un GitHub Release.
 
+Para esta compilación se usó Gradle 8.14.3. Gradle 9.7.1, definido en el wrapper del repositorio, elimina una API interna requerida por el Android Gradle Plugin 8.13.
+
 ## Verificación y evidencias
 
 - **Pruebas locales:** 58 pruebas de Laravel y 18 de Ionic aprobadas. El contenedor ejecutó las 12 migraciones con SQLite, devolvió 200 en `/up` y 401 en `/api/pendientes` sin token. La imagen ejecuta como `www-data` y el arranque sin `APP_KEY` terminó con un error explícito.
-- **Producción y TLS:** pendiente la URL pública. Abrir la web, confirmar que inicia sesión contra la API e inspeccionar las solicitudes del navegador. Ejecutar `curl -fsS https://<api>.onrender.com/up` sin desactivar la validación TLS. Consultar `/api/pendientes` con `Accept: application/json` sin token y comprobar que devuelve 401.
-- **Migraciones:** pendiente. Registrar la ejecución de las migraciones en los logs de Render y comprobar que el despliegue terminó correctamente.
+- **Producción y TLS:** la portada web y `/up` respondieron 200 sobre HTTPS con validación del certificado. `/api/pendientes` sin token devolvió 401 y la solicitud de preflight desde el dominio de Pages devolvió 204 con el origen correcto.
+- **Migraciones:** Render registró la creación de la tabla de migraciones, la ejecución de migraciones en PostgreSQL y el inicio exitoso del servicio. [Registro del despliegue inicial](https://dashboard.render.com/web/srv-dbvrsgnf3r2c73fui350/deploys/dep-dbvrsh7f3r2c73fui4u0)
+- **Publicación inicial:** Render construyó desde `codex/lab14-despliegue`. Cloudflare Pages recibió el ZIP de la compilación de producción mediante carga directa. Sigue pendiente activar la publicación automática desde `main`.
 - **Acción exitosa:** pendiente el enlace de la ejecución de `main` con los trabajos `api`, `web` y `deploy` en verde, más el estado del despliegue en Render.
 - **Acción detenida:** pendiente el enlace a un PR de prueba con una aserción temporal que falle. Comprobar el fallo en Actions y que no se inició ningún despliegue. Retirar la aserción antes de integrar el PR.
 - **Secretos:** revisar que la web compilada solo contiene la URL pública de la API y que el repositorio y la imagen excluyen los archivos de entorno y de firma.
