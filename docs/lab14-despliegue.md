@@ -42,7 +42,7 @@ En desarrollo usar `.env.example` como base para `.env`. La web que sirve Larave
 | Artefacto | Construcción | Tamaño |
 | --- | --- | --- |
 | Web, `dist-web/` | `npm --prefix mobile ci` y `npm --prefix mobile run build:web` con `VITE_API_URL` | 48 294 bytes en producción, 16 895 bytes en el ZIP de carga. |
-| Imagen de la API | `docker build -t gemdy-api .` | 260 047 286 bytes en la compilación local inicial. CI registra el tamaño de cada nueva imagen. |
+| Imagen de la API | `docker build -t gemdy-api .` | 268 796 854 bytes en la compilación local con el certificado de Aiven. CI registra el tamaño de cada nueva imagen. |
 | Compilación de Ionic, `mobile/dist/` | `npm --prefix mobile run build` | 1 249 705 bytes con la API pública. |
 | APK de distribución | Compilación y firma de Android | 3 540 348 bytes. Firma Android v2 y v3 verificada. |
 
@@ -67,7 +67,7 @@ Para esta compilación se usó Gradle 8.14.3. Gradle 9.7.1, definido en el wrapp
 - **Pruebas locales:** 58 pruebas de Laravel y 18 de Ionic aprobadas. El contenedor ejecutó las 12 migraciones con SQLite, devolvió 200 en `/up` y 401 en `/api/pendientes` sin token. La imagen ejecuta como `www-data` y el arranque sin `APP_KEY` terminó con un error explícito.
 - **Producción y TLS:** la portada web y `/up` respondieron 200 sobre HTTPS con validación del certificado. `/api/pendientes` sin token devolvió 401 y la solicitud de preflight desde el dominio de Pages devolvió 204 con el origen correcto.
 - **Migraciones:** Render registró la creación de la tabla de migraciones, la ejecución de migraciones en PostgreSQL y el inicio exitoso del servicio. [Registro del despliegue inicial](https://dashboard.render.com/web/srv-dbvrsgnf3r2c73fui350/deploys/dep-dbvrsh7f3r2c73fui4u0)
-- **Publicación inicial:** Render construyó desde `codex/lab14-despliegue`. Cloudflare Pages recibió el ZIP de la compilación de producción mediante carga directa. Sigue pendiente activar la publicación automática desde `main`.
-- **Acción exitosa:** pendiente el enlace de la ejecución de `main` con los trabajos `api`, `web` y `deploy` en verde, más el estado del despliegue en Render.
+- **Publicación web:** Cloudflare Pages recibió el ZIP de producción mediante carga directa. La integración Git de Pages requiere que el propietario de `Gerald0522/Gemdy-Calendar` instale la app de Cloudflare para ese repositorio. [Requisitos de Cloudflare Pages](https://developers.cloudflare.com/pages/configuration/git-integration/github-integration/)
+- **Acción exitosa:** `api`, `web` y `deploy` finalizaron correctamente en `main`. Render confirmó que el mismo commit `dc28797` quedó en producción y que el disparador fue el Deploy Hook. [Ejecución de GitHub Actions](https://github.com/Gerald0522/Gemdy-Calendar/actions/runs/44670638641) · [Despliegue de Render](https://dashboard.render.com/web/srv-dbvrsgnf3r2c73fui350/deploys/dep-dbvs8aafngtc73ab1ajg)
 - **Acción detenida:** la prueba deliberadamente fallida se ejecutó en una rama de evidencia. GitHub Actions registró `api` fallido, `web` exitoso y `deploy` omitido. [Ejecución de GitHub Actions](https://github.com/Gerald0522/Gemdy-Calendar/actions/runs/44669986165)
 - **Secretos:** revisar que la web compilada solo contiene la URL pública de la API y que el repositorio y la imagen excluyen los archivos de entorno y de firma.
