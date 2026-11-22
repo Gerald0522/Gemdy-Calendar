@@ -11,16 +11,29 @@
 <body>
     <main class="main" style="max-width:500px;margin:8vh auto">
         <section class="card">
-            <h1>Iniciar sesión</h1>
-            <p>Accede a tus tareas de GEMDY Calendar.</p>
+            <h1 id="auth-title">Iniciar sesión</h1>
+            <p id="auth-description">Accede a tus tareas de GEMDY Calendar.</p>
             <form id="login-form">
+                <fieldset id="register-fields" aria-label="Datos personales" hidden disabled>
+                    <div class="field"><label for="nombre1">Primer nombre</label><input id="nombre1" name="nombre1" autocomplete="given-name" maxlength="50" required></div>
+                    <div class="field"><label for="nombre2">Segundo nombre (opcional)</label><input id="nombre2" name="nombre2" autocomplete="additional-name" maxlength="50"></div>
+                    <div class="field"><label for="apellido1">Primer apellido</label><input id="apellido1" name="apellido1" autocomplete="family-name" maxlength="50" required></div>
+                    <div class="field"><label for="apellido2">Segundo apellido (opcional)</label><input id="apellido2" name="apellido2" maxlength="50"></div>
+                    <div class="field"><label for="telefono">Teléfono (opcional)</label><input id="telefono" name="telefono" type="tel" autocomplete="tel" maxlength="20"></div>
+                </fieldset>
                 <div class="field"><label for="correo">Correo</label><input id="correo" name="correo" type="email"
-                        required></div>
+                        autocomplete="username" maxlength="100" required></div>
                 <div class="field"><label for="contrasena">Contraseña</label><input id="contrasena" name="contrasena"
-                        type="password" required></div>
+                        type="password" autocomplete="current-password" required></div>
+                <div class="field" id="confirmation-field" hidden>
+                    <p id="password-hint">Usa al menos 8 caracteres, con mayúsculas, minúsculas, números y símbolos.</p>
+                    <label for="contrasena_confirmation">Confirma tu contraseña</label>
+                    <input id="contrasena_confirmation" name="contrasena_confirmation" type="password" autocomplete="new-password" required disabled>
+                </div>
                 <p id="login-error" role="alert" aria-live="polite"></p><button class="button"
                     type="submit">Ingresar</button>
             </form>
+            <p><span id="auth-prompt">¿Eres nuevo?</span> <button class="button" id="auth-toggle" type="button">Crear cuenta</button></p>
         </section>
     </main>
     <script type="module" src="js/login.js"></script>
