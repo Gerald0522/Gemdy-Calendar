@@ -1,6 +1,6 @@
 # Laboratorio 14 · Despliegue de Gemdy Calendar
 
-- Web pública: https://gemdy-calendar.pages.dev/
+- Web pública: https://gemdy-calendar-5a7.pages.dev/
 - API pública: https://gemdy-calendar.onrender.com/api
 - Estado de la API: https://gemdy-calendar.onrender.com/up
 
@@ -16,7 +16,8 @@ flowchart LR
     Android["Ionic · APK firmado"] -->|HTTPS| API
     API -->|PostgreSQL con TLS| DB["PostgreSQL · Aiven Free"]
     CI["GitHub Actions"] -->|Deploy Hook| API
-    CI -->|Carga directa de Pages| Web
+    GitHub["Repositorio GitHub · main"] -->|Integración nativa de Git| Web
+    CI -->|Resultado del mismo commit| Web
 ```
 
 ## Entornos y despliegue
@@ -25,8 +26,9 @@ En desarrollo usar `.env.example` como base para `.env`. La web que sirve Larave
 
 1. En Aiven se creó el servicio PostgreSQL Free `pg-2c7ef480`. Descargar su certificado público a `certs/aiven-ca.pem` y añadir el certificado al repositorio.
 2. En Render crear un Web Service Docker desde la raíz del repositorio, con puerto `8080`, verificación en `/up` y Auto-Deploy desactivado. El contenedor arranca como `www-data`, valida el entorno, ejecuta las migraciones y genera las cachés de Laravel.
-3. En Cloudflare Pages se usa el proyecto `gemdy-calendar` de carga directa, con `main` como rama de producción. GitHub Actions compila la web y publica el artefacto `dist-web/` con Wrangler. Se eligió esta modalidad porque la integración nativa de Git requiere una instalación en la cuenta propietaria del repositorio. [Carga directa con CI](https://developers.cloudflare.com/pages/how-to/use-direct-upload-with-continuous-integration/)
-4. Registrar `RENDER_DEPLOY_HOOK`, `CLOUDFLARE_ACCOUNT_ID` y `CLOUDFLARE_API_TOKEN` como secretos de GitHub Actions. El token de Cloudflare tiene permiso de escritura en Pages. Configurar las variables de repositorio `CLOUDFLARE_PAGES_PROJECT=gemdy-calendar` y `VITE_API_URL=https://gemdy-calendar.onrender.com/api`.
+3. El sitio definitivo es el proyecto Pages con integración Git de `Gerald0522/Gemdy-Calendar` y rama de producción `main`. Desde la raíz usa `npm --prefix mobile ci && npm --prefix mobile run build:web`, publica `dist-web` y recibe `NODE_VERSION=22` y `VITE_API_URL=https://gemdy-calendar.onrender.com/api`.
+4. Para compilar en Pages desde `main`, `mobile/verify-pages-ci.mjs` espera que GitHub Actions apruebe el mismo `CF_PAGES_COMMIT_SHA`. Si CI falla, se cancela o no puede verificarse, la compilación termina con error. La ruta pública `/deployment-version.json` devuelve el SHA de la publicación que está activa.
+5. El Deploy Hook de Render se guarda como secreto `RENDER_DEPLOY_HOOK`. El flujo también mantiene el sitio histórico de carga directa con los secretos `CLOUDFLARE_ACCOUNT_ID` y `CLOUDFLARE_API_TOKEN`, y la variable `CLOUDFLARE_PAGES_PROJECT=gemdy-calendar`.
 
 | Variables de Render | Valores |
 | --- | --- |
@@ -34,7 +36,7 @@ En desarrollo usar `.env.example` como base para `.env`. La web que sirve Larave
 | `APP_KEY` | Generarla una vez con `php artisan key:generate --show` y guardarla en Render |
 | `DB_CONNECTION`, `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD` | `pgsql` y los datos de conexión de Aiven |
 | `DB_SSLMODE`, `DB_SSLROOTCERT` | `verify-full`, `/var/www/html/certs/aiven-ca.pem` |
-| `CORS_ALLOWED_ORIGINS` | `https://<proyecto>.pages.dev,https://localhost,capacitor://localhost` |
+| `CORS_ALLOWED_ORIGINS` | Orígenes HTTPS de los dos sitios Pages, `https://localhost` y `capacitor://localhost` |
 | `LOG_CHANNEL`, `SESSION_DRIVER`, `CACHE_STORE`, `QUEUE_CONNECTION` | `stderr`, `database`, `database`, `sync` |
 
 ## Artefactos
@@ -64,10 +66,13 @@ Para esta compilación se usó Gradle 8.14.3. Gradle 9.7.1, definido en el wrapp
 
 ## Verificación y evidencias
 
+- **Pages nativo aprobado:** el dominio definitivo publicó `2ccd384` tras una comprobación exitosa de Cloudflare Pages. [Comprobaciones del commit](https://github.com/Gerald0522/Gemdy-Calendar/commit/2ccd3847adfd61d7a98ce715ec7ee77a58bef6da/checks)
+- **Pages nativo bloqueado:** el push de control `7f74909` hizo fallar `php artisan test`, omitió `deploy` en GitHub Actions y dejó fallida la comprobación **Cloudflare Pages**. El dominio definitivo siguió publicando `2ccd384`. La web y `/up` respondieron 200. [Ejecución de control](https://github.com/Gerald0522/Gemdy-Calendar/actions/runs/44971325490) · [Comprobaciones del commit](https://github.com/Gerald0522/Gemdy-Calendar/commit/7f7490952f8b14bff1b94ce004249716f4d21bfb/checks)
+- **Reversión:** `e5c892c` retiró la prueba temporal. CI y Pages finalizaron correctamente y el dominio publicó el commit de reversión. [Ejecución de recuperación](https://github.com/Gerald0522/Gemdy-Calendar/actions/runs/44971387558)
+
 - **Pruebas locales:** 58 pruebas de Laravel y 18 de Ionic aprobadas. El contenedor ejecutó las 12 migraciones con SQLite, devolvió 200 en `/up` y 401 en `/api/pendientes` sin token. La imagen ejecuta como `www-data` y el arranque sin `APP_KEY` terminó con un error explícito.
 - **Producción y TLS:** la portada web y `/up` respondieron 200 sobre HTTPS con validación del certificado. `/api/pendientes` sin token devolvió 401 y la solicitud de preflight desde el dominio de Pages devolvió 204 con el origen correcto.
 - **Migraciones:** Render registró la creación de la tabla de migraciones, la ejecución de migraciones en PostgreSQL y el inicio exitoso del servicio. [Registro del despliegue inicial](https://dashboard.render.com/web/srv-dbvrsgnf3r2c73fui350/deploys/dep-dbvrsh7f3r2c73fui4u0)
-- **Publicación web:** el primer despliegue se hizo con el ZIP de producción. La publicación automática desde `main` quedó verificada en el commit `c397a9d`: pasaron `api` y `web`, Render aceptó el Deploy Hook y Wrangler publicó en Cloudflare Pages. Después, la web y `/up` respondieron 200 por HTTPS. [Ejecución de GitHub Actions](https://github.com/Gerald0522/Gemdy-Calendar/actions/runs/44671612591)
+- **Sitio histórico:** el primer despliegue se hizo con el ZIP de producción. El commit `c397a9d` verificó la publicación automática por Wrangler en el sitio de carga directa. [Ejecución de GitHub Actions](https://github.com/Gerald0522/Gemdy-Calendar/actions/runs/44671612591)
 - **Acción exitosa:** `api`, `web` y `deploy` finalizaron correctamente en `main`. Render confirmó que el mismo commit `dc28797` quedó en producción y que el disparador fue el Deploy Hook. [Ejecución de GitHub Actions](https://github.com/Gerald0522/Gemdy-Calendar/actions/runs/44670638641) · [Despliegue de Render](https://dashboard.render.com/web/srv-dbvrsgnf3r2c73fui350/deploys/dep-dbvs8aafngtc73ab1ajg)
-- **Acción detenida:** la prueba deliberadamente fallida se ejecutó en una rama de evidencia. GitHub Actions registró `api` fallido, `web` exitoso y `deploy` omitido. [Ejecución de GitHub Actions](https://github.com/Gerald0522/Gemdy-Calendar/actions/runs/44669986165)
 - **Secretos:** revisar que la web compilada solo contiene la URL pública de la API y que el repositorio y la imagen excluyen los archivos de entorno y de firma.
