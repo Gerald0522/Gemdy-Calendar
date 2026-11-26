@@ -4,18 +4,19 @@ import { connected } from './network';
 import { session } from './session';
 import type { CacheListado, Listado, Pendiente } from '../models';
 
-export async function consultarListado(page = 1): Promise<{ listado: Listado; fecha: string; obsoleto: boolean }> {
+export async function consultarListado(page = 1, buscar = ''): Promise<{ listado: Listado; fecha: string; obsoleto: boolean }> {
   const usuarioId = session.value!.usuario.id;
   try {
     if (!connected.value) throw new Error('Sin conexión');
-    const listado = await api<Listado>(`/pendientes?por_pagina=20&page=${page}`);
+    const filtro = buscar ? `&buscar=${encodeURIComponent(buscar)}` : '';
+    const listado = await api<Listado>(`/pendientes?por_pagina=20&page=${page}${filtro}`);
     const fecha = new Date().toISOString();
     try {
-      await Preferences.set({ key: 'gemdy-listado', value: JSON.stringify({ usuarioId, listado, fecha }) });
+      if (!buscar) await Preferences.set({ key: 'gemdy-listado', value: JSON.stringify({ usuarioId, listado, fecha }) });
     } catch {}
     return { listado, fecha, obsoleto: false };
   } catch (error) {
-    if (error instanceof ApiError) throw error;
+    if (buscar || error instanceof ApiError) throw error;
     const { value } = await Preferences.get({ key: 'gemdy-listado' });
     if (value) {
       try {

@@ -162,6 +162,19 @@ describe('Sesión e intercepción centralizada', () => {
 });
 
 describe('Caché sin conexión', () => {
+  it('envía la búsqueda paginada sin reemplazar ni devolver la caché general', async () => {
+    await saveSession(activeSession());
+    const cached = JSON.stringify({ usuarioId: 1, listado: { data: [item] } });
+    mocks.preferences.set('gemdy-listado', cached);
+    const listado = { data: [], meta: { current_page: 2, last_page: 2, total: 20 } };
+    vi.mocked(fetch).mockResolvedValue(new Response(JSON.stringify(listado)));
+    await expect(consultarListado(2, 'A & B')).resolves.toMatchObject({ listado });
+    expect(fetch).toHaveBeenCalledWith(expect.stringContaining('/pendientes?por_pagina=20&page=2&buscar=A%20%26%20B'), expect.anything());
+    expect(mocks.preferences.get('gemdy-listado')).toBe(cached);
+    connected.value = false;
+    await expect(consultarListado(2, 'A & B')).rejects.toThrow('Sin conexión');
+  });
+
   it('recupera el último listado y conserva su marca de tiempo', async () => {
     await saveSession(activeSession());
     const listado = { data: [item], meta: { current_page: 1, last_page: 1, total: 1 } };

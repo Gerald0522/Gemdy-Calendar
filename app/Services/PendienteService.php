@@ -31,13 +31,10 @@ class PendienteService
             );
         }
 
-        if (!empty($filtros['buscar'])) {
-    $query->where(
-        'titulo',
-        'like',
-        '%' . $filtros['buscar'] . '%'
-    );
-}
+        $buscar = $filtros['buscar'] ?? '';
+        if (is_string($buscar) && trim($buscar) !== '') {
+            $query->whereLike('titulo', '%' . trim($buscar) . '%');
+        }
 
         if (!empty($filtros['estado'])) {
             $query->estado($filtros['estado']);

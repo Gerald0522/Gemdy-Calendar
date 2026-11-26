@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
-import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonButtons, IonButton, IonList, IonItem, IonLabel, IonBadge, IonRefresher, IonRefresherContent, IonText, onIonViewWillEnter, useIonRouter } from '@ionic/vue';
+import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonButtons, IonButton, IonList, IonItem, IonLabel, IonBadge, IonRefresher, IonRefresherContent, IonSearchbar, IonText, onIonViewWillEnter, useIonRouter } from '@ionic/vue';
 import type { RefresherCustomEvent } from '@ionic/vue';
 import DataState from '../components/DataState.vue';
 import AppNavigation from '../components/AppNavigation.vue';
@@ -15,29 +15,47 @@ const loading = ref(false);
 const error = ref('');
 const fecha = ref('');
 const obsoleto = ref(false);
+const buscar = ref('');
 const isStale = computed(() => obsoleto.value || !connected.value);
 const ionRouter = useIonRouter();
 let owner: number | undefined;
+let latestRequest = 0;
 
 async function load(page = 1, event?: RefresherCustomEvent) {
-  if (loading.value) { await event?.target.complete(); return; }
+  const request = ++latestRequest;
+  const usuarioId = session.value?.usuario.id;
   loading.value = true;
   error.value = '';
-  if (owner !== session.value?.usuario.id) listado.value = null;
-  owner = session.value?.usuario.id;
+  if (owner !== usuarioId) listado.value = null;
+  owner = usuarioId;
   try {
-    const result = await consultarListado(page);
-    if (owner !== session.value?.usuario.id) return;
+    const result = await consultarListado(page, buscar.value.trim());
+    if (request !== latestRequest || usuarioId !== session.value?.usuario.id) return;
     listado.value = result.listado;
     fecha.value = result.fecha;
     obsoleto.value = result.obsoleto;
   } catch (e) {
+    if (request !== latestRequest) return;
     if (e instanceof ApiError && e.status === 401) listado.value = null;
     error.value = errorMessage(e);
-  } finally { loading.value = false; await event?.target.complete(); }
+  } finally {
+    if (request === latestRequest) loading.value = false;
+    await event?.target.complete();
+  }
+}
+
+function search(value: string | null | undefined) {
+  const query = value ?? '';
+  const changed = query.trim() !== buscar.value.trim();
+  buscar.value = query;
+  if (!changed) return;
+  listado.value = null;
+  void load();
 }
 
 async function logout() {
+  latestRequest++;
+  buscar.value = '';
   loading.value = true;
   try { await api('/auth/logout', { method: 'POST' }); }
   catch {}
@@ -60,7 +78,8 @@ onIonViewWillEnter(() => load());
       <main id="contenido-movil" class="page-width" tabindex="-1">
         <div class="page-heading"><div><p class="eyebrow">Mantén tus pendientes al día</p><h1>Tareas</h1><p class="muted">Registra y organiza tus entregas universitarias.</p></div><ion-button router-link="/pendientes/nuevo" :disabled="!connected">Crear tarea</ion-button></div>
         <ion-text v-if="isStale" color="warning"><p role="status">Información no actualizada{{ !connected ? ' · Sin conexión' : '' }}. Última consulta: {{ fecha ? new Date(fecha).toLocaleString() : 'sin datos guardados' }}.</p></ion-text>
-        <DataState :loading="loading" :error="error" :empty="!!listado && !listado.data.length" empty-text="No hay pendientes en este listado." @retry="load(listado?.meta.current_page || 1)" />
+        <ion-searchbar :value="buscar" :debounce="300" aria-label="Buscar tareas por título" placeholder="Buscar tareas por título" :disabled="!connected" @ion-input="search($event.detail.value)" />
+        <DataState :loading="loading" :error="error" :empty="!!listado && !listado.data.length" :empty-text="buscar.trim() ? 'No hay tareas que coincidan con la búsqueda.' : 'No hay pendientes en este listado.'" @retry="load(listado?.meta.current_page || 1)" />
         <section class="surface" aria-label="Tareas registradas"><div class="section-heading"><h2>Tareas registradas</h2><span v-if="listado" class="counter">{{ listado.meta.total }} {{ listado.meta.total === 1 ? 'tarea' : 'tareas' }}</span></div>
         <ion-list v-if="!loading && listado">
           <ion-item v-for="item in listado.data" :key="item.id" :router-link="`/pendientes/${item.id}`" detail>
