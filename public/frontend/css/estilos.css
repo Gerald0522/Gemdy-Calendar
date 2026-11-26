@@ -807,3 +807,7 @@ fieldset,
 form > .button + .button {
     margin-top: var(--s3);
 }
+
+.card li + li {
+    margin-top: var(--s2);
+}
