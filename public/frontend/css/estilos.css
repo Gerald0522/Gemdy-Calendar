@@ -824,3 +824,13 @@ form > .button + .button {
 #cerrar-sesion:not(:disabled):hover {
     background: #FFE1DE;
 }
+
+.calendar-toolbar .row {
+    flex: 1;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+}
+
+.calendar-toolbar h2 {
+    text-align: center;
+}
