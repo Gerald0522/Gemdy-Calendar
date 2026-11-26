@@ -33,7 +33,15 @@ class PendienteService
 
         $buscar = $filtros['buscar'] ?? '';
         if (is_string($buscar) && trim($buscar) !== '') {
-            $query->whereLike('titulo', '%' . trim($buscar) . '%');
+            $pattern = '%' . trim($buscar) . '%';
+            if ($query->getConnection()->getDriverName() === 'pgsql') {
+                $query->whereRaw(
+                    'translate(lower(titulo), ?, ?) LIKE translate(lower(?), ?, ?)',
+                    ['áéíóúü', 'aeiouu', $pattern, 'áéíóúü', 'aeiouu']
+                );
+            } else {
+                $query->whereLike('titulo', $pattern);
+            }
         }
 
         if (!empty($filtros['estado'])) {

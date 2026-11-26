@@ -11,9 +11,10 @@ const initial = () => ({ nombre: '', tipo: 'clase' as BloqueHorario['tipo'], dia
 const form = reactive(initial());
 const blocks = ref<BloqueHorario[]>([]);
 const search = ref('');
-const query = computed(() => search.value.trim().toLocaleLowerCase('es'));
+const normalize = (text: string) => text.toLocaleLowerCase('es').normalize('NFD').replace(/[\u0300-\u0301\u0308]/g, '');
+const query = computed(() => normalize(search.value.trim()));
 const matchingBlocks = computed(() => blocks.value.filter(block =>
-  [block.nombre, block.tipo].some(value => value.toLocaleLowerCase('es').includes(query.value))
+  [block.nombre, block.tipo].some(value => normalize(value).includes(query.value))
 ));
 const loading = ref(false);
 const saving = ref(false);
@@ -21,6 +22,7 @@ const error = ref('');
 const formError = ref('');
 const message = ref('');
 async function load(): Promise<void> {
+  if (saving.value || loading.value) return;
   loading.value = true; error.value = ''; blocks.value = []; message.value = ''; Object.assign(form, initial());
   try { blocks.value = await consultarHorario(); }
   catch { error.value = 'No se pudo cargar el horario guardado en este dispositivo.'; }
@@ -36,7 +38,7 @@ async function add(): Promise<void> {
   saving.value = true;
   try {
     const updated = [...blocks.value, { ...form, nombre: form.nombre.trim(), dias: [...form.dias].sort(), id: crypto.randomUUID() }];
-    await guardarHorario(updated); blocks.value = updated; Object.assign(form, initial()); message.value = 'Bloque agregado al horario.';
+    await guardarHorario(updated); blocks.value = updated; search.value = ''; Object.assign(form, initial()); message.value = 'Bloque agregado al horario.';
   } catch { formError.value = 'No se pudo guardar el bloque. Vuelve a pulsar Agregar al horario para reintentar.'; }
   finally { saving.value = false; }
 }
@@ -70,7 +72,7 @@ onIonViewWillEnter(load);
           <ion-text v-if="message" color="success"><p role="status">{{ message }}</p></ion-text>
         </section>
         <section class="surface" aria-labelledby="schedule-heading"><h2 id="schedule-heading">Horario semanal</h2><p class="muted">Guardado en este dispositivo para tu cuenta.</p>
-          <ion-searchbar aria-label="Buscar bloques del horario" placeholder="Buscar bloques del horario" @ion-input="search = $event.detail.value ?? ''" />
+          <ion-searchbar :value="search" aria-label="Buscar bloques del horario" placeholder="Buscar bloques del horario" @ion-input="search = $event.detail.value ?? ''" />
           <DataState :empty="!matchingBlocks.length" :empty-text="query ? 'No hay bloques que coincidan con la búsqueda.' : 'Aún no hay bloques. Agrega tu primera actividad.'" />
           <article v-for="block in matchingBlocks" :key="block.id" class="schedule-block"><ion-badge :class="block.tipo">{{ block.tipo }}</ion-badge><h3>{{ block.nombre }}</h3><p>{{ block.dias.map(day => names[day]).join(', ') }}</p><p>{{ block.inicio }} - {{ block.fin }}</p><ion-button fill="outline" :aria-label="`Eliminar ${block.nombre}`" :disabled="saving" @click="remove(block.id)">Eliminar</ion-button></article>
         </section>

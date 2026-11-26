@@ -68,7 +68,7 @@ const action = (label, fn) => {
 
 function render(s) {
     tbody.replaceChildren();
-    status.textContent = s.status === "loading" ? "Cargando tareas..." : s.status === "error" ? `Error: ${s.error}` : s.status === "empty" ? "No hay tareas para mostrar." : `Mostrando ${s.rows.length} de ${s.total} tareas.`;
+    status.textContent = s.status === "loading" ? "Cargando tareas..." : s.status === "error" ? `Error: ${s.error}` : s.status === "empty" ? (s.query ? "No hay tareas que coincidan con la búsqueda." : "No hay tareas para mostrar.") : `Mostrando ${s.rows.length} de ${s.total} tareas.`;
     $("tareas-vacio").hidden = true;
     $("tarea-contador").textContent = `${s.total} tareas`;
     $("lab9-reintentar").hidden = s.status !== "error";
@@ -136,7 +136,12 @@ async function remove(id) {
 
 form.addEventListener("submit", async (event) => {
     event.preventDefault();
-    if (!form.reportValidity()) return;
+    const saveButton = $("lab9-guardar");
+    if (saveButton.disabled || !form.reportValidity()) return;
+    const message = $("tarea-error");
+    const confirmation = $("tarea-confirmacion");
+    message.hidden = true;
+    confirmation.textContent = "";
     const data = {
         usuario_id: user.id,
         titulo: form.elements.nombre.value.trim(),
@@ -146,16 +151,22 @@ form.addEventListener("submit", async (event) => {
         estado: state.value.editing ? state.value.editingStatus : "pendiente"
     };
     state.set({ errors: {} });
+    saveButton.disabled = true;
     try {
         if (state.value.editing) await api.editar(state.value.editing, data);
         else await api.crear(data);
+        confirmation.textContent = `Se guardó «${data.titulo}».`;
         form.reset();
-        state.set({ editing: null, editingStatus: null });
-        await load(state.value.page);
+        clearTimeout(debounceTimer);
+        search.value = "";
+        state.set({ editing: null, editingStatus: null, query: "" });
+        await load();
     } catch (error) {
         if (error.status === 422) state.set({ errors: error.errors });
-        else $("tarea-error").textContent = error.message;
-        $("tarea-error").hidden = error.status === 422;
+        message.textContent = error.message;
+        message.hidden = false;
+    } finally {
+        saveButton.disabled = false;
     }
 });
 

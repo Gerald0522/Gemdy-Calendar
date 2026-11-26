@@ -2,6 +2,7 @@
 import { api } from "./api.js";
 
 const $ = (id) => document.getElementById(id);
+const normalizar = texto => texto.toLocaleLowerCase("es").normalize("NFD").replace(/[\u0300-\u0301\u0308]/g, "");
 
 const hoy = new Date();
 
@@ -258,7 +259,7 @@ const renderizar = () => {
 };
 
 const renderizarBusqueda = () => {
-    const consulta = $("buscar").value.trim().toLocaleLowerCase("es");
+    const consulta = normalizar($("buscar").value.trim());
     const panel = $("resultados-calendario");
     const lista = $("calendario-resultados-lista");
     panel.hidden = !consulta || estado.cargando || !!estado.error;
@@ -266,7 +267,7 @@ const renderizarBusqueda = () => {
     if (panel.hidden) return;
 
     const coincidencias = estado.tareas.filter(tarea =>
-        tarea.fecha_limite && tarea.titulo.toLocaleLowerCase("es").includes(consulta)
+        tarea.fecha_limite && normalizar(tarea.titulo).includes(consulta)
     );
     $("calendario-coincidencias").textContent = coincidencias.length
         ? `${coincidencias.length} coincidencias`

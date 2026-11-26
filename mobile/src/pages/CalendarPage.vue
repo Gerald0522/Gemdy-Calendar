@@ -21,9 +21,10 @@ const dateKey = (date: Date) => `${date.getFullYear()}-${String(date.getMonth() 
 const formatDate = (date: Date) => new Intl.DateTimeFormat('es-CR', { day: 'numeric', month: 'long', year: 'numeric' }).format(date);
 const monthTitle = computed(() => new Intl.DateTimeFormat('es-CR', { month: 'long', year: 'numeric' }).format(month.value));
 const selectedTasks = computed(() => tasks.value.filter(task => task.fecha_limite?.slice(0, 10) === dateKey(selected.value)));
-const query = computed(() => search.value.trim().toLocaleLowerCase('es'));
+const normalize = (text: string) => text.toLocaleLowerCase('es').normalize('NFD').replace(/[\u0300-\u0301\u0308]/g, '');
+const query = computed(() => normalize(search.value.trim()));
 const matchingTasks = computed(() => tasks.value.flatMap(task => {
-  if (!task.fecha_limite || !task.titulo.toLocaleLowerCase('es').includes(query.value)) return [];
+  if (!task.fecha_limite || !normalize(task.titulo).includes(query.value)) return [];
   const [year, month, day] = task.fecha_limite.slice(0, 10).split('-').map(Number);
   return [{ task, date: new Date(year, month - 1, day, 12) }];
 }));

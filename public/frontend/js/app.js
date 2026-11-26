@@ -179,16 +179,40 @@ if ($("horario-form")) {
     const search = $("buscar");
     const empty = $("horario-vacio");
     const emptySchedule = empty.textContent;
-    const blocks = [];
+    const account = JSON.parse(sessionStorage.getItem("gemdy_usuario") || "null");
+    const storageKey = `gemdy-horario-${account?.id ?? "local"}`;
+    let blocks = [];
     const names = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
+    const normalize = value => value.toLocaleLowerCase("es").normalize("NFD").replace(/[\u0300-\u0301\u0308]/g, "");
+
+    try {
+        const saved = JSON.parse(localStorage.getItem(storageKey) || "[]");
+        if (!Array.isArray(saved)) throw new Error("Horario inválido");
+        blocks = saved;
+    } catch {
+        showMessage("horario-error", "No se pudo cargar el horario guardado en este navegador.");
+        form.querySelector("button[type=submit]").disabled = true;
+    }
+
+    function saveSchedule(nextBlocks) {
+        try {
+            localStorage.setItem(storageKey, JSON.stringify(nextBlocks));
+        } catch {
+            showMessage("horario-error", "No se pudo guardar el cambio en este navegador.");
+            return false;
+        }
+        blocks = nextBlocks;
+        renderSchedule();
+        return true;
+    }
 
     function renderSchedule() {
         const body = $("horario-lista");
-        const query = search.value.trim().toLocaleLowerCase("es");
+        const query = normalize(search.value.trim());
         body.replaceChildren();
 
         blocks.forEach((block, index) => {
-            if (![block.name, block.type].some(value => value.toLocaleLowerCase("es").includes(query))) return;
+            if (![block.name, block.type].some(value => normalize(value).includes(query))) return;
             const row = document.createElement("tr");
             addCell(row, block.days.map((day) => names[day]).join(", "));
             addCell(row, block.start);
@@ -202,9 +226,9 @@ if ($("horario-form")) {
             remove.textContent = "Eliminar";
             remove.setAttribute("aria-label", "Eliminar " + block.name);
             remove.addEventListener("click", () => {
-                blocks.splice(index, 1);
-                renderSchedule();
-                form.querySelector("button[type=submit]").focus();
+                if (saveSchedule(blocks.filter((_, blockIndex) => blockIndex !== index))) {
+                    form.querySelector("button[type=submit]").focus();
+                }
             });
             actions.append(remove);
             row.append(actions);
@@ -231,13 +255,15 @@ if ($("horario-form")) {
             $("fin").focus();
             return;
         }
-        blocks.push({
+        const block = {
             name: String(data.get("nombre")).trim(),
             type: String(data.get("tipo")),
             start: String(data.get("inicio")),
             end: String(data.get("fin")),
             days
-        });
+        };
+        if (!saveSchedule([...blocks, block])) return;
+        search.value = "";
         form.reset();
         renderSchedule();
         $("nombre-bloque").focus();
