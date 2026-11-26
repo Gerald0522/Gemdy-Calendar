@@ -811,3 +811,16 @@ form > .button + .button {
 .card li + li {
     margin-top: var(--s2);
 }
+
+#cerrar-sesion {
+    margin-left: auto;
+}
+
+#cerrar-sesion:not(:disabled) {
+    background: #FFF0EF;
+    color: #AC3028;
+}
+
+#cerrar-sesion:not(:disabled):hover {
+    background: #FFE1DE;
+}
