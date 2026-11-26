@@ -4,14 +4,17 @@ import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonButton, IonTex
 import AppNavigation from '../components/AppNavigation.vue';
 import DataState from '../components/DataState.vue';
 import { consultarCalendario } from '../services/pendientes';
+import { consultarHorario } from '../services/horario';
 import { errorMessage } from '../services/api';
 import { connected } from '../services/network';
-import type { Pendiente } from '../models';
+import type { BloqueHorario, Pendiente } from '../models';
 
 const today = new Date();
 const selected = ref(new Date(today.getFullYear(), today.getMonth(), today.getDate(), 12));
 const month = ref(new Date(today.getFullYear(), today.getMonth(), 1, 12));
 const tasks = ref<Pendiente[]>([]);
+const blocks = ref<BloqueHorario[]>([]);
+const scheduleError = ref('');
 const search = ref('');
 const loading = ref(false);
 const error = ref('');
@@ -23,11 +26,15 @@ const monthTitle = computed(() => new Intl.DateTimeFormat('es-CR', { month: 'lon
 const selectedTasks = computed(() => tasks.value.filter(task => task.fecha_limite?.slice(0, 10) === dateKey(selected.value)));
 const normalize = (text: string) => text.toLocaleLowerCase('es').normalize('NFD').replace(/[\u0300-\u0301\u0308]/g, '');
 const query = computed(() => normalize(search.value.trim()));
-const matchingTasks = computed(() => tasks.value.flatMap(task => {
-  if (!task.fecha_limite || !normalize(task.titulo).includes(query.value)) return [];
+const matchingTasks = computed(() => tasks.value.flatMap<{ task: Pendiente; date: Date | null }>(task => {
+  if (!normalize(task.titulo).includes(query.value)) return [];
+  if (!task.fecha_limite) return [{ task, date: null }];
   const [year, month, day] = task.fecha_limite.slice(0, 10).split('-').map(Number);
   return [{ task, date: new Date(year, month - 1, day, 12) }];
 }));
+const matchingBlocks = computed(() => blocks.value.filter(block =>
+  [block.nombre, block.tipo].some(text => normalize(text).includes(query.value))
+));
 const days = computed(() => {
   const year = month.value.getFullYear();
   const index = month.value.getMonth();
@@ -49,11 +56,16 @@ function selectDate(date: Date): void {
 async function load(): Promise<void> {
   if (loading.value) return;
   loading.value = true; error.value = ''; tasks.value = [];
+  blocks.value = [];
+  scheduleError.value = '';
+  const schedule = consultarHorario().then(result => { blocks.value = result; }).catch(() => {
+    scheduleError.value = 'No se pudo consultar el horario guardado.';
+  });
   try {
     const result = await consultarCalendario();
     tasks.value = result.pendientes; timestamp.value = result.fecha; stale.value = result.obsoleto;
   } catch (e) { error.value = errorMessage(e); }
-  finally { loading.value = false; }
+  finally { await schedule; loading.value = false; }
 }
 onIonViewWillEnter(load);
 </script>
@@ -67,13 +79,19 @@ onIonViewWillEnter(load);
         <div class="page-heading"><div><p class="eyebrow">Organiza tu semana</p><h1>Calendario</h1><p class="muted">Visualiza tus tareas y fechas de entrega.</p></div><ion-button @click="selectDate(new Date(today))">Ir a hoy</ion-button></div>
         <ion-text v-if="stale || !connected" color="warning"><p role="status">Información no actualizada · Última consulta: {{ timestamp ? new Date(timestamp).toLocaleString() : 'sin datos guardados' }}.</p></ion-text>
         <DataState :loading="loading" :error="error" @retry="load" />
-        <ion-searchbar aria-label="Buscar tareas del calendario" placeholder="Buscar tareas del calendario" @ion-input="search = $event.detail.value ?? ''" />
-        <section v-if="query && !loading && !error" class="surface" aria-labelledby="calendar-results">
+        <ion-searchbar aria-label="Buscar tareas o bloques" placeholder="Buscar tareas o bloques" @ion-input="search = $event.detail.value ?? ''" />
+        <section v-if="query && !loading" class="surface" aria-labelledby="calendar-results">
           <h2 id="calendar-results">Resultados de búsqueda</h2>
-          <DataState :empty="!matchingTasks.length" empty-text="No hay tareas del calendario que coincidan con la búsqueda." />
+          <p v-if="scheduleError" role="status">{{ scheduleError }}</p>
+          <DataState :empty="!error && !scheduleError && !matchingTasks.length && !matchingBlocks.length" empty-text="No se encontraron tareas ni bloques." />
           <ion-list v-if="matchingTasks.length">
-            <ion-item v-for="{ task, date } in matchingTasks" :key="task.id" button @click="selectDate(date)">
-              <ion-label class="ion-text-wrap"><h3>{{ task.titulo }}</h3><p>{{ formatDate(date) }}</p></ion-label>
+            <ion-item v-for="{ task, date } in matchingTasks" :key="task.id" :button="!!date" :router-link="date ? undefined : `/pendientes/${task.id}`" @click="date && selectDate(date)">
+              <ion-label class="ion-text-wrap"><h3>{{ task.titulo }}</h3><p>{{ date ? formatDate(date) : 'Sin fecha de entrega' }}</p></ion-label>
+            </ion-item>
+          </ion-list>
+          <ion-list v-if="matchingBlocks.length">
+            <ion-item v-for="block in matchingBlocks" :key="block.id" :router-link="`/horario?buscar=${encodeURIComponent(block.nombre)}`">
+              <ion-label class="ion-text-wrap"><h3>{{ block.nombre }}</h3><p>{{ block.tipo }} · {{ block.inicio }}–{{ block.fin }}</p></ion-label>
             </ion-item>
           </ion-list>
         </section>

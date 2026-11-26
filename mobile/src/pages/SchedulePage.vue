@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, reactive, ref } from 'vue';
+import { useRoute } from 'vue-router';
 import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonInput, IonSelect, IonSelectOption, IonCheckbox, IonButton, IonBadge, IonText, IonSearchbar, onIonViewWillEnter } from '@ionic/vue';
 import AppNavigation from '../components/AppNavigation.vue';
 import DataState from '../components/DataState.vue';
@@ -7,6 +8,7 @@ import { consultarHorario, guardarHorario, validarBloque } from '../services/hor
 import type { BloqueHorario } from '../models';
 
 const names = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
+const route = useRoute();
 const initial = () => ({ nombre: '', tipo: 'clase' as BloqueHorario['tipo'], dias: [] as number[], inicio: '', fin: '' });
 const form = reactive(initial());
 const blocks = ref<BloqueHorario[]>([]);
@@ -14,7 +16,8 @@ const search = ref('');
 const normalize = (text: string) => text.toLocaleLowerCase('es').normalize('NFD').replace(/[\u0300-\u0301\u0308]/g, '');
 const query = computed(() => normalize(search.value.trim()));
 const matchingBlocks = computed(() => blocks.value.filter(block =>
-  [block.nombre, block.tipo].some(value => normalize(value).includes(query.value))
+  [block.nombre, block.tipo, block.inicio, block.fin, ...block.dias.map(day => names[day])]
+    .some(value => normalize(value).includes(query.value))
 ));
 const loading = ref(false);
 const saving = ref(false);
@@ -23,6 +26,7 @@ const formError = ref('');
 const message = ref('');
 async function load(): Promise<void> {
   if (saving.value || loading.value) return;
+  search.value = typeof route.query.buscar === 'string' ? route.query.buscar : '';
   loading.value = true; error.value = ''; blocks.value = []; message.value = ''; Object.assign(form, initial());
   try { blocks.value = await consultarHorario(); }
   catch { error.value = 'No se pudo cargar el horario guardado en este dispositivo.'; }

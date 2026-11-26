@@ -72,6 +72,9 @@ function render(s) {
     $("tareas-vacio").hidden = true;
     $("tarea-contador").textContent = `${s.total} tareas`;
     $("lab9-reintentar").hidden = s.status !== "error";
+    $("tareas-busqueda").textContent = s.query
+        ? s.status === "loading" ? "Buscando…" : s.status === "error" ? "No se pudo buscar." : `Tareas encontradas: ${s.total}`
+        : "";
     if (s.status === "data") {
         for (const task of s.rows) {
             const row = document.createElement("tr");
@@ -170,6 +173,8 @@ form.addEventListener("submit", async (event) => {
     }
 });
 
+search.value = new URLSearchParams(window.location.search).get("buscar") || "";
+state.set({ query: search.value.trim() });
 search.placeholder = "Buscar tareas...";
 search.addEventListener("input", () => {
     clearTimeout(debounceTimer);

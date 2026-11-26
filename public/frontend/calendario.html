@@ -26,7 +26,7 @@
                 <header class="topbar">
                     <a class="mobile-brand" href="index.html">▦ GEMDY</a>
                     <label class="search-label" for="buscar">Buscar</label>
-                    <input id="buscar" placeholder="Buscar tareas del calendario" type="search">
+                    <input id="buscar" placeholder="Buscar tareas o bloques" type="search" aria-controls="resultados-calendario">
                     <div class="user">
                         Estudiante
                         <span aria-hidden="true">◉</span>
@@ -41,6 +41,11 @@
                         </div>
                         <button class="button" id="hoy" type="button">Ir a hoy</button>
                     </div>
+                    <section id="resultados-calendario" class="card" aria-labelledby="titulo-resultados" hidden>
+                        <h2 id="titulo-resultados">Resultados de búsqueda</h2>
+                        <p id="calendario-coincidencias" role="status"></p>
+                        <ul id="calendario-resultados-lista"></ul>
+                    </section>
                     <section aria-labelledby="titulo-cal" class="card calendar-card">
                         <div class="calendar-toolbar">
                             <div class="row">
@@ -73,11 +78,6 @@
     Reintentar
 </button>                    </section>
                     <section aria-labelledby="titulo-dia" class="card details">
-                        <div id="resultados-calendario" hidden>
-                            <h2>Resultados de búsqueda</h2>
-                            <p id="calendario-coincidencias" role="status"></p>
-                            <ul id="calendario-resultados-lista"></ul>
-                        </div>
                         <h2 id="titulo-dia">Actividades del día</h2>
                         <div aria-live="polite" id="detalle-dia">
                             <p class="muted">Selecciona un día del calendario.</p>

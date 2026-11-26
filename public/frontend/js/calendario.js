@@ -38,6 +38,7 @@ const estado = {
         hoy.getDate()
     ),
     tareas: [],
+    bloques: [],
     cargando: false,
     error: ""
 };
@@ -262,21 +263,32 @@ const renderizarBusqueda = () => {
     const consulta = normalizar($("buscar").value.trim());
     const panel = $("resultados-calendario");
     const lista = $("calendario-resultados-lista");
-    panel.hidden = !consulta || estado.cargando || !!estado.error;
+    panel.hidden = !consulta;
     lista.replaceChildren();
     if (panel.hidden) return;
 
-    const coincidencias = estado.tareas.filter(tarea =>
-        tarea.fecha_limite && normalizar(tarea.titulo).includes(consulta)
+    const coincidencias = estado.tareas.filter(tarea => normalizar(tarea.titulo).includes(consulta));
+    const bloques = estado.bloques.filter(bloque =>
+        [bloque.name, bloque.type].some(valor => normalizar(valor).includes(consulta))
     );
-    $("calendario-coincidencias").textContent = coincidencias.length
-        ? `${coincidencias.length} coincidencias`
-        : "No hay tareas del calendario que coincidan con la búsqueda.";
+    const total = coincidencias.length + bloques.length;
+    $("calendario-coincidencias").textContent = estado.cargando
+        ? "Cargando tareas del calendario…"
+        : estado.error ? `No se pudieron consultar las tareas. Bloques encontrados: ${bloques.length}.`
+        : total ? `Resultados encontrados: ${total}` : "No se encontraron tareas ni bloques.";
 
     for (const tarea of coincidencias) {
+        const elemento = document.createElement("li");
+        if (!tarea.fecha_limite) {
+            const enlace = document.createElement("a");
+            enlace.href = `tareas.html?buscar=${encodeURIComponent(tarea.titulo)}`;
+            enlace.textContent = `${tarea.titulo} · Sin fecha de entrega`;
+            elemento.append(enlace);
+            lista.append(elemento);
+            continue;
+        }
         const [anio, mes, dia] = tarea.fecha_limite.slice(0, 10).split("-").map(Number);
         const fecha = fechaSegura(anio, mes - 1, dia);
-        const elemento = document.createElement("li");
         const boton = document.createElement("button");
         boton.type = "button";
         boton.className = "button secondary";
@@ -288,6 +300,14 @@ const renderizarBusqueda = () => {
             renderizarDetalles();
         });
         elemento.append(boton);
+        lista.append(elemento);
+    }
+    for (const bloque of bloques) {
+        const elemento = document.createElement("li");
+        const enlace = document.createElement("a");
+        enlace.href = `horario.html?buscar=${encodeURIComponent(bloque.name)}`;
+        enlace.textContent = `${bloque.name} · ${bloque.type} · ${bloque.start}–${bloque.end}`;
+        elemento.append(enlace);
         lista.append(elemento);
     }
 };
@@ -364,6 +384,13 @@ const iniciarCalendario = async () => {
     window.addEventListener("gemdy:unauthorized", () => {
         window.location.replace("login.html");
     });
+    try {
+        const usuario = JSON.parse(sessionStorage.getItem("gemdy_usuario") || "null");
+        const bloques = JSON.parse(localStorage.getItem(`gemdy-horario-${usuario?.id ?? "local"}`) || "[]");
+        if (Array.isArray(bloques)) estado.bloques = bloques;
+    } catch {
+        estado.bloques = [];
+    }
     $("buscar").addEventListener("input", renderizarBusqueda);
 
     $("anterior").addEventListener("click", () => {

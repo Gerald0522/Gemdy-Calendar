@@ -212,7 +212,8 @@ if ($("horario-form")) {
         body.replaceChildren();
 
         blocks.forEach((block, index) => {
-            if (![block.name, block.type].some(value => normalize(value).includes(query))) return;
+            const text = [block.name, block.type, block.start, block.end, ...block.days.map(day => names[day])];
+            if (!text.some(value => normalize(value).includes(query))) return;
             const row = document.createElement("tr");
             addCell(row, block.days.map((day) => names[day]).join(", "));
             addCell(row, block.start);
@@ -236,6 +237,7 @@ if ($("horario-form")) {
         });
         empty.hidden = body.childElementCount > 0;
         empty.textContent = query ? "No hay bloques que coincidan con la búsqueda." : emptySchedule;
+        $("horario-busqueda").textContent = query ? `Bloques encontrados: ${body.childElementCount}` : "";
     }
 
     form.addEventListener("submit", (event) => {
@@ -270,6 +272,7 @@ if ($("horario-form")) {
     });
     form.addEventListener("reset", () => showMessage("horario-error", ""));
     search.addEventListener("input", renderSchedule);
+    search.value = new URLSearchParams(window.location.search).get("buscar") || "";
     renderSchedule();
 }
 

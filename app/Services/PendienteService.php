@@ -36,7 +36,7 @@ class PendienteService
             $pattern = '%' . trim($buscar) . '%';
             if ($query->getConnection()->getDriverName() === 'pgsql') {
                 $query->whereRaw(
-                    'translate(lower(titulo), ?, ?) LIKE translate(lower(?), ?, ?)',
+                    'translate(lower(titulo), ?, ?) LIKE translate(lower(CAST(? AS text)), ?, ?)',
                     ['áéíóúü', 'aeiouu', $pattern, 'áéíóúü', 'aeiouu']
                 );
             } else {
