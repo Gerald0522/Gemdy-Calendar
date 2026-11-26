@@ -4,7 +4,8 @@ import { useRoute } from 'vue-router';
 import { IonPage, IonHeader, IonToolbar, IonTitle, IonButtons, IonBackButton, IonContent, IonInput, IonTextarea, IonSelect, IonSelectOption, IonButton, IonText, onIonViewWillEnter, useIonRouter } from '@ionic/vue';
 import DataState from '../components/DataState.vue';
 import AppNavigation from '../components/AppNavigation.vue';
-import { crearPendiente, actualizarPendiente, consultarPendiente } from '../services/pendientes';
+import { crearPendiente, actualizarPendiente, consultarPendiente, consultarListado } from '../services/pendientes';
+import { session } from '../services/session';
 import { ApiError, errorMessage } from '../services/api';
 import { connected } from '../services/network';
 import type { Pendiente } from '../models';
@@ -17,6 +18,9 @@ const loading = ref(false);
 const error = ref('');
 const errors = ref<Record<string, string[]>>({});
 const loadError = ref('');
+const tasks = ref<Pendiente[]>([]);
+const tasksLoading = ref(false);
+const tasksError = ref('');
 const ionRouter = useIonRouter();
 async function load(): Promise<void> {
   Object.assign(form, initial()); error.value = ''; errors.value = {}; loadError.value = '';
@@ -28,7 +32,24 @@ async function load(): Promise<void> {
   } catch (e) { loadError.value = errorMessage(e); }
   finally { loading.value = false; }
 }
-onIonViewWillEnter(load);
+async function loadTasks(): Promise<void> {
+  const owner = session.value?.usuario.id;
+  tasksLoading.value = true;
+  tasksError.value = '';
+  tasks.value = [];
+  try {
+    const { listado } = await consultarListado();
+    if (owner === session.value?.usuario.id) tasks.value = listado.data.slice(0, 5);
+  } catch (e) {
+    tasksError.value = errorMessage(e);
+  } finally {
+    tasksLoading.value = false;
+  }
+}
+onIonViewWillEnter(() => {
+  void loadTasks();
+  void load();
+});
 async function save() {
   if (loading.value) return;
   error.value = ''; errors.value = {};
@@ -53,6 +74,15 @@ async function save() {
     <ion-header><ion-toolbar><ion-buttons slot="start"><ion-back-button default-href="/pendientes" text="Cancelar" /></ion-buttons><ion-title>{{ editing ? 'Editar tarea' : 'Crear tarea' }}</ion-title></ion-toolbar></ion-header>
     <ion-content class="ion-padding"><AppNavigation /><main id="contenido-movil" class="page-width" tabindex="-1">
       <div class="page-heading"><div><p class="eyebrow">Organiza tus entregas</p><h1>{{ editing ? 'Editar tarea' : 'Ingresar tarea' }}</h1><p class="muted">Completa los campos para {{ editing ? 'actualizar' : 'registrar' }} una tarea.</p></div></div>
+      <section class="surface" aria-labelledby="registered-tasks">
+        <div class="section-heading"><h2 id="registered-tasks">Tareas registradas</h2><ion-button fill="clear" router-link="/pendientes">Ver todas</ion-button></div>
+        <DataState :loading="tasksLoading" :error="tasksError" :empty="!tasks.length" empty-text="No hay tareas registradas." @retry="loadTasks" />
+        <ul v-if="tasks.length">
+          <li v-for="task in tasks" :key="task.id">
+            <RouterLink :to="`/pendientes/${task.id}`">{{ task.titulo }}</RouterLink>
+          </li>
+        </ul>
+      </section>
       <DataState :error="loadError" @retry="load" />
       <form v-if="!loadError" class="surface task-form" @submit.prevent="save">
         <ion-input v-model="form.titulo" label="Título *" label-placement="stacked" :minlength="3" :maxlength="150" required :disabled="loading" />

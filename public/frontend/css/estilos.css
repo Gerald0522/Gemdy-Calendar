@@ -775,16 +775,6 @@ fieldset,
     }
 }
 
-/* CONTAINER QUERY - PANTALLAS AMPLIAS */
-
-@container (min-width: 76rem) {
-    .tasks-layout {
-        grid-template-columns:
-            minmax(22rem, 1fr)
-            minmax(30rem, 1.5fr);
-    }
-}
-
 /* PANTALLAS ESTRECHAS Y ZOOM */
 
 @media (max-width: 35.999rem) {

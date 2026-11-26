@@ -6,7 +6,8 @@
         <meta content="#4F7CFF" name="theme-color">
         <title>Calendario | GEMDY Calendar</title>
         <link href="css/estilos.css" rel="stylesheet">
-<script type="module" src="js/calendario.js"></script>    </head>
+<script type="module" src="js/calendario.js"></script>    <script type="module" src="js/logout.js"></script>
+</head>
     <body>
         <a class="skip" href="#contenido">Saltar al contenido</a>
         <div class="app">
@@ -27,10 +28,7 @@
                     <a class="mobile-brand" href="index.html">▦ GEMDY</a>
                     <label class="search-label" for="buscar">Buscar</label>
                     <input id="buscar" placeholder="Buscar tareas o bloques" type="search" aria-controls="resultados-calendario">
-                    <div class="user">
-                        Estudiante
-                        <span aria-hidden="true">◉</span>
-                    </div>
+                    <button class="button secondary" id="cerrar-sesion" type="button">Cerrar sesión</button>
                 </header>
                 <main class="main" id="contenido" tabindex="-1">
                     <div class="heading">

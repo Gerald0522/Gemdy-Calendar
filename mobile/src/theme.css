@@ -108,6 +108,5 @@ ion-button::part(native):focus-visible, ion-input::part(native):focus-visible, i
   .calendar-layout { grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); }
 }
 @media (min-width: 75rem) {
-  .schedule-layout { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
   .calendar-day { min-height: 4.5rem; }
 }

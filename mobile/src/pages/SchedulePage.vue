@@ -63,6 +63,11 @@ onIonViewWillEnter(load);
       <div class="page-heading"><div><p class="eyebrow">Diseña tu semana</p><h1>Generar horario</h1><p class="muted">Distribuye tus clases, estudio y actividades.</p></div></div>
       <DataState :loading="loading" :error="error" @retry="load" />
       <div v-if="!loading && !error" class="schedule-layout">
+        <section class="surface" aria-labelledby="schedule-heading"><h2 id="schedule-heading">Horario semanal</h2><p class="muted">Guardado en este dispositivo para tu cuenta.</p>
+          <ion-searchbar :value="search" aria-label="Buscar bloques del horario" placeholder="Buscar bloques del horario" @ion-input="search = $event.detail.value ?? ''" />
+          <DataState :empty="!matchingBlocks.length" :empty-text="query ? 'No hay bloques que coincidan con la búsqueda.' : 'Aún no hay bloques. Agrega tu primera actividad.'" />
+          <article v-for="block in matchingBlocks" :key="block.id" class="schedule-block"><ion-badge :class="block.tipo">{{ block.tipo }}</ion-badge><h3>{{ block.nombre }}</h3><p>{{ block.dias.map(day => names[day]).join(', ') }}</p><p>{{ block.inicio }} - {{ block.fin }}</p><ion-button fill="outline" :aria-label="`Eliminar ${block.nombre}`" :disabled="saving" @click="remove(block.id)">Eliminar</ion-button></article>
+        </section>
         <section class="surface" aria-labelledby="block-heading"><h2 id="block-heading">Agregar bloque</h2><p class="muted">Completa los datos de tu actividad.</p>
           <form @submit.prevent="add">
             <ion-input v-model="form.nombre" label="Nombre del bloque *" label-placement="stacked" :minlength="3" :maxlength="60" required :disabled="saving" />
@@ -74,11 +79,6 @@ onIonViewWillEnter(load);
           </form>
           <DataState :loading="saving" />
           <ion-text v-if="message" color="success"><p role="status">{{ message }}</p></ion-text>
-        </section>
-        <section class="surface" aria-labelledby="schedule-heading"><h2 id="schedule-heading">Horario semanal</h2><p class="muted">Guardado en este dispositivo para tu cuenta.</p>
-          <ion-searchbar :value="search" aria-label="Buscar bloques del horario" placeholder="Buscar bloques del horario" @ion-input="search = $event.detail.value ?? ''" />
-          <DataState :empty="!matchingBlocks.length" :empty-text="query ? 'No hay bloques que coincidan con la búsqueda.' : 'Aún no hay bloques. Agrega tu primera actividad.'" />
-          <article v-for="block in matchingBlocks" :key="block.id" class="schedule-block"><ion-badge :class="block.tipo">{{ block.tipo }}</ion-badge><h3>{{ block.nombre }}</h3><p>{{ block.dias.map(day => names[day]).join(', ') }}</p><p>{{ block.inicio }} - {{ block.fin }}</p><ion-button fill="outline" :aria-label="`Eliminar ${block.nombre}`" :disabled="saving" @click="remove(block.id)">Eliminar</ion-button></article>
         </section>
       </div>
     </main></ion-content>

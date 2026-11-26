@@ -8,6 +8,7 @@
     <title>Tareas | GEMDY Calendar</title>
     <link href="css/estilos.css" rel="stylesheet">
     <script type="module" src="js/tareas.js"></script>
+<script type="module" src="js/logout.js"></script>
 </head>
 
 <body>
@@ -33,10 +34,7 @@
                 <label class="search-label" for="buscar">Buscar</label>
                 <input id="buscar" placeholder="Buscar tareas" type="search">
                 <span id="tareas-busqueda" role="status"></span>
-                <div class="user">
-                    Estudiante
-                    <span aria-hidden="true">◉</span>
-                </div>
+                <button class="button secondary" id="cerrar-sesion" type="button">Cerrar sesión</button>
             </header>
             <main class="main" id="contenido" tabindex="-1">
                 <div class="heading">
@@ -47,6 +45,35 @@
                     </div>
                 </div>
                 <div class="tasks-layout">
+                    <section aria-labelledby="lista-tareas-titulo" class="card">
+                        <div class="section-head">
+                            <div>
+                                <h2 id="lista-tareas-titulo">Tareas registradas</h2>
+                                <p class="muted">Consulta, completa o elimina tus tareas.</p>
+                            </div>
+                            <span class="counter" id="tarea-contador">0 tareas</span>
+                        </div>
+                        <p id="lab9-estado" role="status" aria-live="polite"></p>
+                        <button class="button secondary" id="lab9-reintentar" type="button" hidden>Reintentar</button>
+                        <div class="table-scroll">
+                            <table>
+                                <caption class="sr-only">Listado de tareas registradas</caption>
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Tarea</th>
+                                        <th scope="col">Curso</th>
+                                        <th scope="col">Entrega</th>
+                                        <th scope="col">Prioridad</th>
+                                        <th scope="col">Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tareas-lista"></tbody>
+                            </table>
+                        </div>
+                        <div id="lab9-paginacion" aria-label="Paginación"></div>
+                        <p class="empty" id="tareas-vacio">No hay tareas registradas. Crea la primera usando el
+                            formulario.</p>
+                    </section>
                     <section aria-labelledby="tarea-form-titulo" class="card">
                         <h2 id="tarea-form-titulo">Ingresar tarea</h2>
                         <p class="muted">Completa los campos para registrar una tarea.</p>
@@ -93,35 +120,6 @@
                             <button class="button full" id="lab9-guardar" type="submit">Registrar tarea</button>
                             <button class="button secondary" id="lab9-cancelar" type="button">Cancelar edición</button>
                         </form>
-                    </section>
-                    <section aria-labelledby="lista-tareas-titulo" class="card">
-                        <div class="section-head">
-                            <div>
-                                <h2 id="lista-tareas-titulo">Tareas registradas</h2>
-                                <p class="muted">Consulta, completa o elimina tus tareas.</p>
-                            </div>
-                            <span class="counter" id="tarea-contador">0 tareas</span>
-                        </div>
-                        <p id="lab9-estado" role="status" aria-live="polite"></p>
-                        <button class="button secondary" id="lab9-reintentar" type="button" hidden>Reintentar</button>
-                        <div class="table-scroll">
-                            <table>
-                                <caption class="sr-only">Listado de tareas registradas</caption>
-                                <thead>
-                                    <tr>
-                                        <th scope="col">Tarea</th>
-                                        <th scope="col">Curso</th>
-                                        <th scope="col">Entrega</th>
-                                        <th scope="col">Prioridad</th>
-                                        <th scope="col">Acciones</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="tareas-lista"></tbody>
-                            </table>
-                        </div>
-                        <div id="lab9-paginacion" aria-label="Paginación"></div>
-                        <p class="empty" id="tareas-vacio">No hay tareas registradas. Crea la primera usando el
-                            formulario.</p>
                     </section>
                 </div>
             </main>

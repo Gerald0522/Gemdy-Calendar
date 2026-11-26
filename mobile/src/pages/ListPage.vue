@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
-import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonButtons, IonButton, IonList, IonItem, IonLabel, IonBadge, IonRefresher, IonRefresherContent, IonSearchbar, IonText, onIonViewWillEnter, useIonRouter } from '@ionic/vue';
+import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonButton, IonList, IonItem, IonLabel, IonBadge, IonRefresher, IonRefresherContent, IonSearchbar, IonText, onIonViewWillEnter } from '@ionic/vue';
 import type { RefresherCustomEvent } from '@ionic/vue';
 import DataState from '../components/DataState.vue';
 import AppNavigation from '../components/AppNavigation.vue';
 import { consultarListado } from '../services/pendientes';
-import { api, ApiError, errorMessage } from '../services/api';
-import { clearSession, session } from '../services/session';
+import { ApiError, errorMessage } from '../services/api';
+import { session } from '../services/session';
 import { connected } from '../services/network';
 import type { Listado } from '../models';
 
@@ -17,7 +17,6 @@ const fecha = ref('');
 const obsoleto = ref(false);
 const buscar = ref('');
 const isStale = computed(() => obsoleto.value || !connected.value);
-const ionRouter = useIonRouter();
 let owner: number | undefined;
 let latestRequest = 0;
 
@@ -26,7 +25,10 @@ async function load(page = 1, event?: RefresherCustomEvent) {
   const usuarioId = session.value?.usuario.id;
   loading.value = true;
   error.value = '';
-  if (owner !== usuarioId) listado.value = null;
+  if (owner !== usuarioId) {
+    listado.value = null;
+    buscar.value = '';
+  }
   owner = usuarioId;
   try {
     const result = await consultarListado(page, buscar.value.trim());
@@ -53,25 +55,12 @@ function search(value: string | null | undefined) {
   void load();
 }
 
-async function logout() {
-  latestRequest++;
-  buscar.value = '';
-  loading.value = true;
-  try { await api('/auth/logout', { method: 'POST' }); }
-  catch {}
-  finally {
-    await clearSession().catch(() => {});
-    listado.value = null;
-    loading.value = false;
-    ionRouter.navigate('/login', 'root', 'replace');
-  }
-}
 onIonViewWillEnter(() => load());
 </script>
 
 <template>
   <ion-page>
-    <ion-header><ion-toolbar><ion-title>GEMDY Calendar</ion-title><ion-buttons slot="end"><ion-button :disabled="loading" @click="logout">Salir</ion-button></ion-buttons></ion-toolbar></ion-header>
+    <ion-header><ion-toolbar><ion-title>GEMDY Calendar</ion-title></ion-toolbar></ion-header>
     <ion-content class="ion-padding">
       <ion-refresher slot="fixed" @ion-refresh="load(1, $event)"><ion-refresher-content pulling-text="Arrastra para actualizar" refreshing-text="Actualizando…" /></ion-refresher>
       <AppNavigation />

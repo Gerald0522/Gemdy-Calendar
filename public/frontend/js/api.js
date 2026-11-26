@@ -38,7 +38,7 @@ export class ApiClient {
         }
         const payload = response.status === 204 ? null : await response.json().catch(() => null);
         if (!response.ok) {
-            if (response.status === 401 && path !== "/auth/login") {
+            if (response.status === 401 && path !== "/auth/login" && path !== "/auth/logout") {
                 this.setToken(null);
                 window.dispatchEvent(new CustomEvent("gemdy:unauthorized"));
             }
