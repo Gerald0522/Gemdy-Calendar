@@ -834,3 +834,39 @@ form > .button + .button {
 .calendar-toolbar h2 {
     text-align: center;
 }
+
+.perfil-boton {
+    border: 0;
+    background: none;
+    text-align: left;
+}
+
+.perfil-dialogo {
+    width: min(24rem, calc(100% - 2rem));
+    border: 1px solid var(--border);
+    border-radius: 1.25rem;
+    padding: var(--s6);
+    color: var(--text);
+    box-shadow: 0 .25rem 1.25rem rgba(23, 32, 51, .12);
+}
+
+.perfil-dialogo::backdrop {
+    background: rgba(23, 32, 51, .4);
+}
+
+.perfil-dialogo dl {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: var(--s2) var(--s4);
+    margin: 0 0 var(--s6);
+}
+
+.perfil-dialogo dt {
+    font-weight: 650;
+    color: var(--muted);
+}
+
+.perfil-dialogo dd {
+    margin: 0;
+    overflow-wrap: anywhere;
+}
