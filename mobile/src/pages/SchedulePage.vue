@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { reactive, ref } from 'vue';
-import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonInput, IonSelect, IonSelectOption, IonCheckbox, IonButton, IonBadge, IonText, onIonViewWillEnter } from '@ionic/vue';
+import { computed, reactive, ref } from 'vue';
+import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonInput, IonSelect, IonSelectOption, IonCheckbox, IonButton, IonBadge, IonText, IonSearchbar, onIonViewWillEnter } from '@ionic/vue';
 import AppNavigation from '../components/AppNavigation.vue';
 import DataState from '../components/DataState.vue';
 import { consultarHorario, guardarHorario, validarBloque } from '../services/horario';
@@ -10,6 +10,11 @@ const names = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
 const initial = () => ({ nombre: '', tipo: 'clase' as BloqueHorario['tipo'], dias: [] as number[], inicio: '', fin: '' });
 const form = reactive(initial());
 const blocks = ref<BloqueHorario[]>([]);
+const search = ref('');
+const query = computed(() => search.value.trim().toLocaleLowerCase('es'));
+const matchingBlocks = computed(() => blocks.value.filter(block =>
+  [block.nombre, block.tipo].some(value => value.toLocaleLowerCase('es').includes(query.value))
+));
 const loading = ref(false);
 const saving = ref(false);
 const error = ref('');
@@ -65,8 +70,9 @@ onIonViewWillEnter(load);
           <ion-text v-if="message" color="success"><p role="status">{{ message }}</p></ion-text>
         </section>
         <section class="surface" aria-labelledby="schedule-heading"><h2 id="schedule-heading">Horario semanal</h2><p class="muted">Guardado en este dispositivo para tu cuenta.</p>
-          <DataState :empty="!blocks.length" empty-text="Aún no hay bloques. Agrega tu primera actividad." />
-          <article v-for="block in blocks" :key="block.id" class="schedule-block"><ion-badge :class="block.tipo">{{ block.tipo }}</ion-badge><h3>{{ block.nombre }}</h3><p>{{ block.dias.map(day => names[day]).join(', ') }}</p><p>{{ block.inicio }} - {{ block.fin }}</p><ion-button fill="outline" :aria-label="`Eliminar ${block.nombre}`" :disabled="saving" @click="remove(block.id)">Eliminar</ion-button></article>
+          <ion-searchbar aria-label="Buscar bloques del horario" placeholder="Buscar bloques del horario" @ion-input="search = $event.detail.value ?? ''" />
+          <DataState :empty="!matchingBlocks.length" :empty-text="query ? 'No hay bloques que coincidan con la búsqueda.' : 'Aún no hay bloques. Agrega tu primera actividad.'" />
+          <article v-for="block in matchingBlocks" :key="block.id" class="schedule-block"><ion-badge :class="block.tipo">{{ block.tipo }}</ion-badge><h3>{{ block.nombre }}</h3><p>{{ block.dias.map(day => names[day]).join(', ') }}</p><p>{{ block.inicio }} - {{ block.fin }}</p><ion-button fill="outline" :aria-label="`Eliminar ${block.nombre}`" :disabled="saving" @click="remove(block.id)">Eliminar</ion-button></article>
         </section>
       </div>
     </main></ion-content>

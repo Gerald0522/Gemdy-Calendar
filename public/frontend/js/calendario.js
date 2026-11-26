@@ -254,6 +254,41 @@ const renderizar = () => {
     mostrarEstado();
     renderizarCalendario();
     renderizarDetalles();
+    renderizarBusqueda();
+};
+
+const renderizarBusqueda = () => {
+    const consulta = $("buscar").value.trim().toLocaleLowerCase("es");
+    const panel = $("resultados-calendario");
+    const lista = $("calendario-resultados-lista");
+    panel.hidden = !consulta || estado.cargando || !!estado.error;
+    lista.replaceChildren();
+    if (panel.hidden) return;
+
+    const coincidencias = estado.tareas.filter(tarea =>
+        tarea.fecha_limite && tarea.titulo.toLocaleLowerCase("es").includes(consulta)
+    );
+    $("calendario-coincidencias").textContent = coincidencias.length
+        ? `${coincidencias.length} coincidencias`
+        : "No hay tareas del calendario que coincidan con la búsqueda.";
+
+    for (const tarea of coincidencias) {
+        const [anio, mes, dia] = tarea.fecha_limite.slice(0, 10).split("-").map(Number);
+        const fecha = fechaSegura(anio, mes - 1, dia);
+        const elemento = document.createElement("li");
+        const boton = document.createElement("button");
+        boton.type = "button";
+        boton.className = "button secondary";
+        boton.textContent = `${tarea.titulo} · ${formatearFecha(fecha)}`;
+        boton.addEventListener("click", () => {
+            estado.seleccionada = fecha;
+            estado.vista = fechaSegura(anio, mes - 1, 1);
+            renderizarCalendario(true);
+            renderizarDetalles();
+        });
+        elemento.append(boton);
+        lista.append(elemento);
+    }
 };
 
 const cargarTareas = async () => {
@@ -261,6 +296,7 @@ const cargarTareas = async () => {
     estado.error = "";
 
     mostrarEstado();
+    renderizarBusqueda();
 
     try {
         const tareas = [];
@@ -327,6 +363,7 @@ const iniciarCalendario = async () => {
     window.addEventListener("gemdy:unauthorized", () => {
         window.location.replace("login.html");
     });
+    $("buscar").addEventListener("input", renderizarBusqueda);
 
     $("anterior").addEventListener("click", () => {
         cambiarMes(-1);

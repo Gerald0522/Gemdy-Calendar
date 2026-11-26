@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
-import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonButton, IonText, IonList, IonItem, IonLabel, onIonViewWillEnter } from '@ionic/vue';
+import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonButton, IonText, IonList, IonItem, IonLabel, IonSearchbar, onIonViewWillEnter } from '@ionic/vue';
 import AppNavigation from '../components/AppNavigation.vue';
 import DataState from '../components/DataState.vue';
 import { consultarCalendario } from '../services/pendientes';
@@ -12,6 +12,7 @@ const today = new Date();
 const selected = ref(new Date(today.getFullYear(), today.getMonth(), today.getDate(), 12));
 const month = ref(new Date(today.getFullYear(), today.getMonth(), 1, 12));
 const tasks = ref<Pendiente[]>([]);
+const search = ref('');
 const loading = ref(false);
 const error = ref('');
 const timestamp = ref('');
@@ -20,6 +21,12 @@ const dateKey = (date: Date) => `${date.getFullYear()}-${String(date.getMonth() 
 const formatDate = (date: Date) => new Intl.DateTimeFormat('es-CR', { day: 'numeric', month: 'long', year: 'numeric' }).format(date);
 const monthTitle = computed(() => new Intl.DateTimeFormat('es-CR', { month: 'long', year: 'numeric' }).format(month.value));
 const selectedTasks = computed(() => tasks.value.filter(task => task.fecha_limite?.slice(0, 10) === dateKey(selected.value)));
+const query = computed(() => search.value.trim().toLocaleLowerCase('es'));
+const matchingTasks = computed(() => tasks.value.flatMap(task => {
+  if (!task.fecha_limite || !task.titulo.toLocaleLowerCase('es').includes(query.value)) return [];
+  const [year, month, day] = task.fecha_limite.slice(0, 10).split('-').map(Number);
+  return [{ task, date: new Date(year, month - 1, day, 12) }];
+}));
 const days = computed(() => {
   const year = month.value.getFullYear();
   const index = month.value.getMonth();
@@ -59,6 +66,16 @@ onIonViewWillEnter(load);
         <div class="page-heading"><div><p class="eyebrow">Organiza tu semana</p><h1>Calendario</h1><p class="muted">Visualiza tus tareas y fechas de entrega.</p></div><ion-button @click="selectDate(new Date(today))">Ir a hoy</ion-button></div>
         <ion-text v-if="stale || !connected" color="warning"><p role="status">Información no actualizada · Última consulta: {{ timestamp ? new Date(timestamp).toLocaleString() : 'sin datos guardados' }}.</p></ion-text>
         <DataState :loading="loading" :error="error" @retry="load" />
+        <ion-searchbar aria-label="Buscar tareas del calendario" placeholder="Buscar tareas del calendario" @ion-input="search = $event.detail.value ?? ''" />
+        <section v-if="query && !loading && !error" class="surface" aria-labelledby="calendar-results">
+          <h2 id="calendar-results">Resultados de búsqueda</h2>
+          <DataState :empty="!matchingTasks.length" empty-text="No hay tareas del calendario que coincidan con la búsqueda." />
+          <ion-list v-if="matchingTasks.length">
+            <ion-item v-for="{ task, date } in matchingTasks" :key="task.id" button @click="selectDate(date)">
+              <ion-label class="ion-text-wrap"><h3>{{ task.titulo }}</h3><p>{{ formatDate(date) }}</p></ion-label>
+            </ion-item>
+          </ion-list>
+        </section>
         <div v-if="!loading && !error" class="calendar-layout">
           <section class="surface" aria-label="Calendario mensual">
             <div class="calendar-toolbar"><ion-button fill="outline" aria-label="Mes anterior" @click="changeMonth(-1)">‹</ion-button><h2 aria-live="polite">{{ monthTitle }}</h2><ion-button fill="outline" aria-label="Mes siguiente" @click="changeMonth(1)">›</ion-button></div>

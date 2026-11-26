@@ -176,15 +176,19 @@ if ($("calendario-grid")) {
 
 if ($("horario-form")) {
     const form = $("horario-form");
+    const search = $("buscar");
+    const empty = $("horario-vacio");
+    const emptySchedule = empty.textContent;
     const blocks = [];
     const names = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
 
     function renderSchedule() {
         const body = $("horario-lista");
+        const query = search.value.trim().toLocaleLowerCase("es");
         body.replaceChildren();
-        $("horario-vacio").hidden = blocks.length > 0;
 
         blocks.forEach((block, index) => {
+            if (![block.name, block.type].some(value => value.toLocaleLowerCase("es").includes(query))) return;
             const row = document.createElement("tr");
             addCell(row, block.days.map((day) => names[day]).join(", "));
             addCell(row, block.start);
@@ -206,6 +210,8 @@ if ($("horario-form")) {
             row.append(actions);
             body.append(row);
         });
+        empty.hidden = body.childElementCount > 0;
+        empty.textContent = query ? "No hay bloques que coincidan con la búsqueda." : emptySchedule;
     }
 
     form.addEventListener("submit", (event) => {
@@ -237,6 +243,7 @@ if ($("horario-form")) {
         $("nombre-bloque").focus();
     });
     form.addEventListener("reset", () => showMessage("horario-error", ""));
+    search.addEventListener("input", renderSchedule);
     renderSchedule();
 }
 
