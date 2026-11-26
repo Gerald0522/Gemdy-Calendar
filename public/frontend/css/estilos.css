@@ -803,3 +803,7 @@ fieldset,
 }
 
 }
+
+form > .button + .button {
+    margin-top: var(--s3);
+}
